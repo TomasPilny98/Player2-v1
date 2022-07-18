@@ -1,4 +1,4 @@
-import {Component, ElementRef, OnInit, ViewChild, AfterViewInit} from '@angular/core';
+import {AfterViewInit, Component, ElementRef, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute} from "@angular/router";
 import {VideoDto} from "../video/model";
 import {NgToastService} from "ng-angular-popup";
@@ -13,7 +13,6 @@ import {PlayerRestController} from "../rest/player-rest-controller";
 })
 export class PlayerPageComponent implements OnInit, AfterViewInit {
   @ViewChild('diagnosticCanvas', {static: false}) diagnosticCanvas: ElementRef | undefined;
-  private ctx: CanvasRenderingContext2D | undefined;
   videoDto: VideoDto | any;
   currentTime: number = 0;
   diagnosticMode: boolean = false;
@@ -22,6 +21,7 @@ export class PlayerPageComponent implements OnInit, AfterViewInit {
   enumRef = ButtonMessagesEnum
   image = new Image()
   images: Array<string> = []
+  private ctx: CanvasRenderingContext2D | undefined;
 
   //images_count - 1
 
@@ -41,9 +41,18 @@ export class PlayerPageComponent implements OnInit, AfterViewInit {
         params['images_count'],
         params['origin'],
         params['trigger_timestamp'],
-        params['signal_request'])
+        params['signal_request'],
+        params['preview'])
       this.images = new Array(this.videoDto.images_count)
     })
+
+    this.image.onload = function () {
+      image_load()
+    };
+
+    const image_load = () => {
+      this.ctx!.drawImage(this.image, 0, 0);
+    }
   }
 
   ngAfterViewInit() {
@@ -65,6 +74,7 @@ export class PlayerPageComponent implements OnInit, AfterViewInit {
   }
 
   startStopButtonClicked() {
+
     this.videoPlaying = !this.videoPlaying;
     if (this.videoPlaying)
       this.onStartDrawImage();
@@ -101,12 +111,9 @@ export class PlayerPageComponent implements OnInit, AfterViewInit {
       })
   }
 
-  onStartDrawImage() {
+  onStartDrawImage = () => {
     console.log('entering onStartDrawImage()')
-    this.image.src = this.images[0]
-    console.log(this.image.src)
-    this.ctx!.drawImage(this.image, 0, 0);
-
+    let counter = 0;
+    this.image.src = "data:image/png;base64," + this.images[0]
   }
-
 }

@@ -1,4 +1,4 @@
-export enum ButtonMessagesEnum{
+export enum ButtonMessagesEnum {
   MSG0 = "forward play",
   MSG1 = "backward play",
   MSG2 = "go 1 frame back",

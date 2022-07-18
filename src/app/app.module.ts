@@ -1,9 +1,9 @@
-import { NgModule } from '@angular/core';
-import { BrowserModule } from '@angular/platform-browser';
-import { AppRoutingModule, routingComponents } from './app-routing.module';
-import { AppComponent } from './app.component';
-import { VideoComponent } from './video';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import {NgModule} from '@angular/core';
+import {BrowserModule} from '@angular/platform-browser';
+import {AppRoutingModule, routingComponents} from './app-routing.module';
+import {AppComponent} from './app.component';
+import {VideoComponent} from './video';
+import {NoopAnimationsModule} from '@angular/platform-browser/animations';
 import {MatFormFieldModule} from "@angular/material/form-field";
 import {MatInputModule} from "@angular/material/input";
 import {MatDatepickerModule} from "@angular/material/datepicker";
@@ -14,7 +14,7 @@ import {MatButtonModule} from "@angular/material/button";
 import {MatIconModule} from "@angular/material/icon";
 import {HttpClientModule} from '@angular/common/http';
 import {MatTooltipModule} from "@angular/material/tooltip";
-import { VideoPreviewDirective } from './video-preview.directive';
+import {VideoPreviewDirective} from './video-preview.directive';
 import {NgToastModule} from "ng-angular-popup";
 
 
@@ -46,4 +46,5 @@ import {NgToastModule} from "ng-angular-popup";
   providers: [],
   bootstrap: [AppComponent]
 })
-export class AppModule { }
+export class AppModule {
+}

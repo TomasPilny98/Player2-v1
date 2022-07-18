@@ -10,7 +10,7 @@
         <input matEndDate placeholder="End date">
       </mat-date-range-input>
       <mat-hint>MM/DD/YYYY – MM/DD/YYYY</mat-hint>
-      <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+      <mat-datepicker-toggle [for]="picker" matSuffix></mat-datepicker-toggle>
       <mat-date-range-picker #picker></mat-date-range-picker>
     </mat-form-field>
 
@@ -28,14 +28,14 @@
     </mat-form-field>
 
     <div class="example-button-container">
-      <button mat-fab color="basic" (click)="onSearchButtonClicked()">
+      <button (click)="onSearchButtonClicked()" color="basic" mat-fab>
         <mat-icon>search</mat-icon>
       </button>
     </div>
 
     <div class="example-button-container">
-      <button mat-fab color="basic" (click)="onClearButtonClicked()"
-              matTooltipPosition="above" matTooltip="Clear page">
+      <button (click)="onClearButtonClicked()" color="basic" mat-fab
+              matTooltip="Clear page" matTooltipPosition="above">
         <mat-icon>clear</mat-icon>
       </button>
     </div>
@@ -50,10 +50,9 @@
 </div>
 
 
-
 <div class="footer">
-  <button mat-fab color="basic" (click)="onSearchButtonClicked()"
-          matTooltipPosition="above" matTooltip="Load X more videos" class="load-more-button">
+  <button (click)="onSearchButtonClicked()" class="load-more-button" color="basic"
+          mat-fab matTooltip="Load X more videos" matTooltipPosition="above">
     <mat-icon>keyboard_arrow_down</mat-icon>
   </button>
 </div>

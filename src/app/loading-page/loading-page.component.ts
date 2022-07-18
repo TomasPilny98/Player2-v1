@@ -1,19 +1,16 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
 import {FormControl} from "@angular/forms";
 import {PlayerRestController} from "../rest/player-rest-controller";
-
-import {VideoComponent} from "../video";
 import {VideoPreviewDirective} from "../video-preview.directive";
 
 import {VideoDto} from "../video/model";
-import {ActivatedRoute, Router} from "@angular/router";
 
 @Component({
   selector: 'app-loading-page',
   templateUrl: './loading-page.component.html',
   styleUrls: ['./loading-page.component.scss']
 })
-export class LoadingPageComponent implements OnInit{
+export class LoadingPageComponent implements OnInit {
   @ViewChild(VideoPreviewDirective, {static: true}) videoPreviewHost!: VideoPreviewDirective;
 
   videoDtoArray: Array<VideoDto> = new Array<VideoDto>();
@@ -36,7 +33,7 @@ export class LoadingPageComponent implements OnInit{
     })
   }
 
-  onClearButtonClicked(){
+  onClearButtonClicked() {
     this.videoDtoArray.splice(0)
   }
 
@@ -51,6 +48,7 @@ export class LoadingPageComponent implements OnInit{
     // this is here for  testing purpose only
     this.playerRestController.onGetAllVideosMetadata().subscribe(metadata => {
       this.videoDtoArray = metadata
+      console.log(metadata)
     })
   }
 }

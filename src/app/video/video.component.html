@@ -1,6 +1,6 @@
-<div class="video-container" (click)="onClickHandler()" [id]="Id">
-  <div class="video-thumbnail">
-    <input type="image" alt="thumbnail">
+<div (click)="onClickHandler()" [id]="Id" class="video-container">
+  <div class="video-thumbnail" *ngIf="imageURL">
+    <img [src]="imageURL" width="250" height="150" alt=""/>
   </div>
   <div class="video-title">
     video id:{{videoDto.id}},

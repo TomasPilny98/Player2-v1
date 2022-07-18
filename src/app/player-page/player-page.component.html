@@ -2,7 +2,7 @@
 
   <div class="header">
     <div class="home-button-div">
-      <button mat-raised-button color="basic" matTooltip="Return to home page" routerLink="/" class="player-button">
+      <button class="player-button" color="basic" mat-raised-button matTooltip="Return to home page" routerLink="/">
         <mat-icon>home</mat-icon>
       </button>
     </div>
@@ -19,11 +19,11 @@
 
     <div class="right-section" id="right-section">
       <div class="video-section" id="video-section">
-        <video #videoRefPause [hidden]="diagnosticMode" controls (timeupdate)="setCurrentTime($event)">
+        <video #videoRefPause (timeupdate)="setCurrentTime($event)" [hidden]="diagnosticMode" controls>
           <source src="{{videoDto.videoSource}}" type="video/mp4">
         </video>
         <canvas #diagnosticCanvas [hidden]="!diagnosticMode"
-                style="background-color: lightblue" id="diagnosticCanvas" width="800" height="600">
+                height="600" id="diagnosticCanvas" style="background-color: lightblue" width="800">
         </canvas>
       </div>
 
@@ -31,45 +31,45 @@
         <div class="footer-left-section"></div>
         <div class="footer-mid-section">
 
-          <div *ngIf="!diagnosticMode; else diagnosticButtons" class="diagnostic"
-               (click)="toggleDiagnosticMode(true, videoRefPause)">
+          <div (click)="toggleDiagnosticMode(true, videoRefPause)" *ngIf="!diagnosticMode; else diagnosticButtons"
+               class="diagnostic">
             <p>Diagnostic mode</p>
             <label>(start at: {{currentTime.toFixed(1)}}s)</label>
           </div>
 
           <ng-template #diagnosticButtons>
-            <button mat-raised-button (click)="backwardButtonClicked()" class="player-button">
+            <button (click)="backwardButtonClicked()" class="player-button" mat-raised-button>
               <mat-icon *ngIf="backwardPlay; else changedDirection" matTooltip="{{enumRef.MSG0}}">keyboard_arrow_right
               </mat-icon>
               <ng-template #changedDirection>
                 <mat-icon matTooltip="{{enumRef.MSG1}}">keyboard_arrow_left</mat-icon>
               </ng-template>
             </button>
-            <button mat-raised-button matTooltip="{{enumRef.MSG2}}" class="player-button">
+            <button class="player-button" mat-raised-button matTooltip="{{enumRef.MSG2}}">
               <mat-icon>skip_previous</mat-icon>
             </button>
-            <button mat-raised-button matTooltip="{{enumRef.MSG3}}" (click)="startStopButtonClicked()"
-                    class="player-button">
+            <button (click)="startStopButtonClicked()" class="player-button" mat-raised-button
+                    matTooltip="{{enumRef.MSG3}}">
               <mat-icon *ngIf="videoPlaying; else playVideo">pause</mat-icon>
               <ng-template #playVideo>
                 <mat-icon>play_arrow</mat-icon>
               </ng-template>
             </button>
-            <button mat-raised-button matTooltip="{{enumRef.MSG4}}" class="player-button">
+            <button class="player-button" mat-raised-button matTooltip="{{enumRef.MSG4}}">
               <mat-icon>skip_next</mat-icon>
             </button>
-            <button mat-raised-button matTooltip="{{enumRef.MSG5}}" class="player-button">
+            <button class="player-button" mat-raised-button matTooltip="{{enumRef.MSG5}}">
               <mat-icon>rotate_90_degrees_ccw</mat-icon>
             </button>
-            <button mat-raised-button matTooltip="{{enumRef.MSG6}}" class="player-button">
+            <button class="player-button" mat-raised-button matTooltip="{{enumRef.MSG6}}">
               <mat-icon>palette</mat-icon>
             </button>
           </ng-template>
         </div>
 
         <div class="footer-right-section">
-          <button *ngIf="diagnosticMode" mat-raised-button (click)="toggleDiagnosticMode(false, videoRefPause)"
-                  class="end-diagnostic">END DIAGNOSTIC MODE
+          <button (click)="toggleDiagnosticMode(false, videoRefPause)" *ngIf="diagnosticMode" class="end-diagnostic"
+                  mat-raised-button>END DIAGNOSTIC MODE
           </button>
         </div>
 

@@ -1,8 +1,8 @@
-import { NgModule } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
+import {NgModule} from '@angular/core';
+import {RouterModule, Routes} from '@angular/router';
 
-import { PlayerPageComponent } from './player-page';
-import { LoadingPageComponent } from './loading-page';
+import {PlayerPageComponent} from './player-page';
+import {LoadingPageComponent} from './loading-page';
 
 const routes: Routes = [
   {path: '', component: LoadingPageComponent},
@@ -16,5 +16,7 @@ const routes: Routes = [
   imports: [RouterModule.forRoot(routes)],
   exports: [RouterModule]
 })
-export class AppRoutingModule { }
+export class AppRoutingModule {
+}
+
 export const routingComponents = [LoadingPageComponent, PlayerPageComponent]

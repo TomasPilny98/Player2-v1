@@ -1,4 +1,4 @@
-import {Component, Input, OnInit, Output} from '@angular/core';
+import {Component, Input, OnInit} from '@angular/core';
 
 import {VideoDto} from "./model";
 import {Router} from "@angular/router";
@@ -13,12 +13,14 @@ export class VideoComponent implements OnInit {
   @Input() videoDto: VideoDto | any;
 
   Id: number | any;
+  imageURL: string | undefined
 
   constructor(private router: Router) {
   }
 
   ngOnInit() {
     this.Id = this.videoDto.videoId
+    this.imageURL = "data:image/png;base64," + this.videoDto.preview
   }
 
   onClickHandler() {
@@ -31,7 +33,9 @@ export class VideoComponent implements OnInit {
         images_count: this.videoDto.images_count,
         origin: this.videoDto.origin,
         trigger_timestamp: this.videoDto.trigger_timestamp,
-        signal_request: this.videoDto.signal_request}
+        signal_request: this.videoDto.signal_request,
+        preview: this.videoDto.preview
+      }
     })
   }
 
