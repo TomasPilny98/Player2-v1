@@ -4,6 +4,7 @@ import {VideoDto} from "../video/model";
 import {NgToastService} from "ng-angular-popup";
 import {ButtonMessagesEnum} from "./button-messages-enum";
 import {PlayerRestController} from "../rest/player-rest-controller";
+import {skip} from "rxjs";
 
 
 @Component({
@@ -18,12 +19,16 @@ export class PlayerPageComponent implements OnInit, AfterViewInit {
   diagnosticMode: boolean = false;
   videoPlaying: boolean = false;
   backwardPlay: boolean = false;
-  enumRef = ButtonMessagesEnum
-  image = new Image()
-  images: Array<string> = []
+  enumRef = ButtonMessagesEnum;
+  image = new Image();
+  loadedFrames: Array<string> = [];
+  framePrefix: string = "data:image/png;base64,";
+  actualIndex: number = 0
+  frameShift: number = 1
+  videoInterval: number | undefined;
+  diagnosticFps: number = 1000 / 15;
+  loadedVideo: any | undefined;
   private ctx: CanvasRenderingContext2D | undefined;
-
-  //images_count - 1
 
   constructor(private activatedRoute: ActivatedRoute,
               private toastMsg: NgToastService,
@@ -43,7 +48,7 @@ export class PlayerPageComponent implements OnInit, AfterViewInit {
         params['trigger_timestamp'],
         params['signal_request'],
         params['preview'])
-      this.images = new Array(this.videoDto.images_count)
+      this.loadedFrames = new Array(this.videoDto.images_count)
     })
 
     this.image.onload = function () {
@@ -51,12 +56,13 @@ export class PlayerPageComponent implements OnInit, AfterViewInit {
     };
 
     const image_load = () => {
-      this.ctx!.drawImage(this.image, 0, 0);
+      this.ctx!.drawImage(this.image, 0, 0, 800, 600);
     }
   }
 
   ngAfterViewInit() {
     this.getFramesByRange().then()
+    this.getVideoPreviewMp4().then()
   }
 
   toggleDiagnosticMode(diagnosticOn: boolean, videoPreviewRef: any) {
@@ -73,27 +79,7 @@ export class PlayerPageComponent implements OnInit, AfterViewInit {
     this.currentTime = data.target.currentTime;
   }
 
-  startStopButtonClicked() {
-
-    this.videoPlaying = !this.videoPlaying;
-    if (this.videoPlaying)
-      this.onStartDrawImage();
-    this.toastMsg.success({
-      detail: "Success",
-      summary: "video play state:" + this.videoPlaying.toString(),
-      duration: 3000
-    })
-  }
-
-  backwardButtonClicked() {
-    this.backwardPlay = !this.backwardPlay;
-    this.toastMsg.success({
-      detail: "Success",
-      summary: "video backward play:" + this.backwardPlay.toString(),
-      duration: 3000
-    })
-  }
-
+  //TODO handle errors in case this call fails
   async getFramesByRange() {
     this.toastMsg.info({
       detail: "Loading video",
@@ -102,7 +88,7 @@ export class PlayerPageComponent implements OnInit, AfterViewInit {
     })
     await this.playerRestController.onGetFramesByRange(this.videoDto.id, 0, this.videoDto.images_count - 1)
       .subscribe(received_images => {
-        this.images = received_images;
+        this.loadedFrames = received_images;
         this.toastMsg.success({
           detail: "Success",
           summary: "video id: " + this.videoDto.id.toString() + " successfully loaded",
@@ -111,9 +97,56 @@ export class PlayerPageComponent implements OnInit, AfterViewInit {
       })
   }
 
-  onStartDrawImage = () => {
-    console.log('entering onStartDrawImage()')
-    let counter = 0;
-    this.image.src = "data:image/png;base64," + this.images[0]
+  async getVideoPreviewMp4() {
+    console.log(this.videoDto.id, this.videoDto.device_id)
+    await this.playerRestController.onGetPreviewMp4(this.videoDto.id, this.videoDto.device_id)
+      .subscribe(videoFile => {
+        this.loadedVideo = videoFile
+      })
   }
+
+  startStopButtonClicked() {
+    this.videoPlaying = !this.videoPlaying;
+    this.playVideo()
+  }
+
+  backwardButtonClicked() {
+    this.backwardPlay = !this.backwardPlay;
+  }
+
+  playVideo(){
+    if (this.videoPlaying){
+      this.videoInterval = setInterval(() => {
+        if (this.backwardPlay)
+          this.onPreviousFrame()
+        else
+          this.onNextFrame()
+      }, this.diagnosticFps)
+    } else {
+      clearInterval(this.videoInterval)
+    }
+  }
+
+  onNextFrame(){
+    if (this.actualIndex + this.frameShift > this.loadedFrames.length - 1) {
+      this.actualIndex = this.loadedFrames.length
+      this.image.src = this.framePrefix + this.loadedFrames[this.actualIndex - 1]
+      this.toastMsg.error({detail: "ERROR", summary: "You are exceeding maximum index", duration: 3000})
+      return
+    }
+    this.image.src = this.framePrefix + this.loadedFrames[this.actualIndex + this.frameShift];
+    this.actualIndex += this.frameShift
+  }
+
+  onPreviousFrame(){
+    if (this.actualIndex - this.frameShift < 0){
+      this.actualIndex = 0
+      this.image.src = this.framePrefix + this.loadedFrames[this.actualIndex]
+      this.toastMsg.error({detail: "ERROR", summary: "You are trying to access index lower than 0", duration: 3000})
+      return
+    }
+    this.image.src = this.framePrefix + this.loadedFrames[this.actualIndex - this.frameShift];
+    this.actualIndex -= this.frameShift
+  }
+
 }

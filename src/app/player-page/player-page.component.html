@@ -20,7 +20,7 @@
     <div class="right-section" id="right-section">
       <div class="video-section" id="video-section">
         <video #videoRefPause (timeupdate)="setCurrentTime($event)" [hidden]="diagnosticMode" controls>
-          <source src="{{videoDto.videoSource}}" type="video/mp4">
+          <source src="{{loadedVideo}}" type="video/mp4">
         </video>
         <canvas #diagnosticCanvas [hidden]="!diagnosticMode"
                 height="600" id="diagnosticCanvas" style="background-color: lightblue" width="800">
@@ -28,7 +28,9 @@
       </div>
 
       <div class="footer">
-        <div class="footer-left-section"></div>
+        <div class="footer-left-section">
+          <label *ngIf="diagnosticMode">Actual frame: {{actualIndex}}</label>
+        </div>
         <div class="footer-mid-section">
 
           <div (click)="toggleDiagnosticMode(true, videoRefPause)" *ngIf="!diagnosticMode; else diagnosticButtons"
@@ -45,7 +47,7 @@
                 <mat-icon matTooltip="{{enumRef.MSG1}}">keyboard_arrow_left</mat-icon>
               </ng-template>
             </button>
-            <button class="player-button" mat-raised-button matTooltip="{{enumRef.MSG2}}">
+            <button class="player-button" mat-raised-button matTooltip="{{enumRef.MSG2}}" (click)="onPreviousFrame()">
               <mat-icon>skip_previous</mat-icon>
             </button>
             <button (click)="startStopButtonClicked()" class="player-button" mat-raised-button
@@ -55,7 +57,7 @@
                 <mat-icon>play_arrow</mat-icon>
               </ng-template>
             </button>
-            <button class="player-button" mat-raised-button matTooltip="{{enumRef.MSG4}}">
+            <button class="player-button" mat-raised-button matTooltip="{{enumRef.MSG4}}" (click)="onNextFrame()">
               <mat-icon>skip_next</mat-icon>
             </button>
             <button class="player-button" mat-raised-button matTooltip="{{enumRef.MSG5}}">

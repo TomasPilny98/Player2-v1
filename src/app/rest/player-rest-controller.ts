@@ -36,5 +36,8 @@ export class PlayerRestController {
     return this.http.post<any>('http://127.0.0.1:5000/player/get-frames-by-range', {video_id, first, last})
   }
 
+  onGetPreviewMp4(video_id: number, device_id: string) {
+    return this.http.post<any>('http://127.0.0.1:5000/player/get-video-preview-mp4', {video_id, device_id})
+  }
 
 }
