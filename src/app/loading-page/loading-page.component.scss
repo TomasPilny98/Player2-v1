@@ -1,0 +1,76 @@
+.header {
+  display: flex;
+  background-color: lightpink;
+  height: 5vh;
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.3rem;
+  font-weight: bold;
+}
+
+.subheader {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  background-color: lightblue;
+  height: 15vh;
+  padding-left: 25px;
+  padding-bottom: 15px;
+}
+
+.subheader p {
+  opacity: 0.75;
+}
+
+.subheader-buttons {
+  display: flex;
+  min-width: 20vw;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+
+}
+
+.body {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  align-items: center;
+  background-color: lightgreen;
+  padding: 15px;
+  min-height: 20vh;
+}
+
+.example-additional-selection {
+  opacity: 0.75;
+  font-size: 0.75em;
+}
+
+.example-button-container {
+  width: 100%;
+  padding-bottom: 1.34375em;
+  position: relative;
+  margin-left: 30px;
+}
+
+.footer {
+  display: flex;
+  background-color: lightgreen;
+  height: 80px;
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.3rem;
+  font-weight: bold;
+}
+
+.load-more-button {
+  opacity: 0.5;
+}
+
+.load-more-button:hover{
+  opacity: 1;
+}

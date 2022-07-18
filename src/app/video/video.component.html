@@ -1,0 +1,11 @@
+<div class="video-container" (click)="onClickHandler()" [id]="Id">
+  <div class="video-thumbnail">
+    <input type="image" alt="thumbnail">
+  </div>
+  <div class="video-title">
+    video id:{{videoDto.id}},
+    camera id: {{videoDto.device_id}},
+    framerate: {{videoDto.frame_rate}},
+    frames count: {{videoDto.images_count}}
+  </div>
+</div>

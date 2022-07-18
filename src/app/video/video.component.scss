@@ -1,0 +1,23 @@
+.video-container {
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+}
+
+
+.video-thumbnail {
+  width: 250px;
+  height: 150px;
+  margin: 10px 10px 0 10px;
+  background-color: cadetblue;
+}
+
+.video-title {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 250px;
+  margin-left: 10px;
+  background-color: lightpink;
+  flex-wrap: wrap;
+}
