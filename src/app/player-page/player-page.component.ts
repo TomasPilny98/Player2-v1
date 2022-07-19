@@ -50,6 +50,7 @@ export class PlayerPageComponent implements OnInit, AfterViewInit {
         params['signal_request'],
         '')
     })
+    this.setFrameShift()
 
     this.loadedFrames = new Array(this.videoDto.images_count)
 
@@ -63,8 +64,7 @@ export class PlayerPageComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit() {
-    this.getFramesByRange(0, 10).then()
-    //this.getVideoPreviewMp4().then()
+    this.getFramesByRange(0, this.frameShift)
   }
 
   toggleDiagnosticMode(diagnosticOn: boolean, videoPreviewRef: any) {
@@ -82,32 +82,35 @@ export class PlayerPageComponent implements OnInit, AfterViewInit {
   }
 
   //TODO handle errors in case this call fails
-  async getFramesByRange(firstFrame: number, lastFrame: number) {
-    this.toastMsg.info({
-      detail: "Loading video",
-      summary: "video id: " + this.videoDto.id.toString(),
-      duration: 3000
-    })
-    await this.playerRestController.onGetFramesByRange(this.videoDto.id, firstFrame, lastFrame)
+  getFramesByRange(firstFrame: number, lastFrame: number) {
+    this.playerRestController.onGetFramesByRange(this.videoDto.id, firstFrame, lastFrame)
       .subscribe(received_images => {
         for (let frame of received_images){
           this.loadedFrames.push(frame);
         }
-        //console.log(this.loadedFrames.length, this.loadedFrames)
-        this.toastMsg.success({
-          detail: "Success",
-          summary: "video id: " + this.videoDto.id.toString() + " successfully loaded",
-          duration: 3000
-        })
       })
+  }
+
+  getFrameArrayLength(){
+    console.log(this.loadedFrames.length)
+  }
+
+  setFrameShift(){
+    this.frameShift = Math.floor(this.videoDto.frame_rate / this.diagnosticFps)
+  }
+
+  getFrameByIndex(index: number){
+    this.playerRestController.onGetFrameByIndex(this.videoDto.id, index).subscribe(frame => {
+      this.loadedFrames.push(frame)
+    })
   }
 
   canAddFramesByRange(): boolean {
     return this.loadedFrames.length < this.videoDto.images_count - 1
   }
 
-  addFramesByRange() {
-    this.getFramesByRange(this.loadedFrames.length, this.loadedFrames.length + this.diagnosticFps).then()
+  addToLoadedFrames() {
+    this.getFramesByRange(this.loadedFrames.length, this.loadedFrames.length + this.frameShift)
     console.log(this.loadedFrames.length)
   }
 
@@ -132,11 +135,11 @@ export class PlayerPageComponent implements OnInit, AfterViewInit {
     if (this.videoPlaying){
       this.videoInterval = setInterval(() => {
         if (this.backwardPlay){
-          this.onPreviousFrame()
+          this.onPreviousFrame(true)
         }
         else {
-          if (this.canAddFramesByRange()) this.addFramesByRange()
-          this.onNextFrame()
+          if (this.canAddFramesByRange()) this.addToLoadedFrames()
+          this.onNextFrame(true)
         }
       }, this.diagnosticTimeout)
     } else {
@@ -144,26 +147,36 @@ export class PlayerPageComponent implements OnInit, AfterViewInit {
     }
   }
 
-  onNextFrame(){
+  onNextFrame(autoPlay: boolean){
     if (this.actualIndex + this.frameShift > this.loadedFrames.length - 1) {
-      this.actualIndex = this.loadedFrames.length
-      this.image.src = this.framePrefix + this.loadedFrames[this.actualIndex - 1]
-      this.toastMsg.error({detail: "ERROR", summary: "You are exceeding maximum index", duration: 3000})
-      return
+      this.actualIndex = this.loadedFrames.length;
+      this.image.src = this.framePrefix + this.loadedFrames[this.actualIndex - 1];
+      this.toastMsg.error({detail: "ERROR", summary: "You are exceeding maximum index", duration: 3000});
+      return;
     }
-    this.image.src = this.framePrefix + this.loadedFrames[this.actualIndex + this.frameShift];
-    this.actualIndex += this.frameShift
+    if (autoPlay){
+      this.actualIndex += this.frameShift;
+    } else {
+      this.actualIndex += 1
+      console.log(`%c${this.actualIndex}`, "color: green")
+    }
+    this.image.src = this.framePrefix + this.loadedFrames[this.actualIndex];
   }
 
-  onPreviousFrame(){
+  onPreviousFrame(autoPlay: boolean){
     if (this.actualIndex - this.frameShift < 0){
-      this.actualIndex = 0
-      this.image.src = this.framePrefix + this.loadedFrames[this.actualIndex]
-      this.toastMsg.error({detail: "ERROR", summary: "You are trying to access index lower than 0", duration: 3000})
-      return
+      this.actualIndex = 0;
+      this.image.src = this.framePrefix + this.loadedFrames[this.actualIndex];
+      this.toastMsg.error({detail: "ERROR", summary: "You are trying to access index lower than 0", duration: 3000});
+      return;
     }
-    this.image.src = this.framePrefix + this.loadedFrames[this.actualIndex - this.frameShift];
-    this.actualIndex -= this.frameShift
+    if (autoPlay){
+      this.actualIndex -= this.frameShift;
+    } else {
+      this.actualIndex -= 1
+      console.log(`%c${this.actualIndex}`, "color: red")
+    }
+    this.image.src = this.framePrefix + this.loadedFrames[this.actualIndex];
   }
 
 }

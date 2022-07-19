@@ -47,7 +47,7 @@
                 <mat-icon matTooltip="{{enumRef.MSG1}}">keyboard_arrow_left</mat-icon>
               </ng-template>
             </button>
-            <button class="player-button" mat-raised-button matTooltip="{{enumRef.MSG2}}" (click)="onPreviousFrame()"
+            <button class="player-button" mat-raised-button matTooltip="{{enumRef.MSG2}}" (click)="onPreviousFrame(false)"
                     [disabled]="videoPlaying">
               <mat-icon>skip_previous</mat-icon>
             </button>
@@ -58,11 +58,11 @@
                 <mat-icon>play_arrow</mat-icon>
               </ng-template>
             </button>
-            <button class="player-button" mat-raised-button matTooltip="{{enumRef.MSG4}}" (click)="onNextFrame()"
+            <button class="player-button" mat-raised-button matTooltip="{{enumRef.MSG4}}" (click)="onNextFrame(false)"
                     [disabled]="videoPlaying">
               <mat-icon>skip_next</mat-icon>
             </button>
-            <button class="player-button" mat-raised-button matTooltip="{{enumRef.MSG5}}">
+            <button class="player-button" mat-raised-button matTooltip="{{enumRef.MSG5}}" (click)="getFrameArrayLength()">
               <mat-icon>rotate_90_degrees_ccw</mat-icon>
             </button>
           </ng-template>
