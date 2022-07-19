@@ -22,7 +22,7 @@ export class PlayerPageComponent implements OnInit, AfterViewInit {
   image = new Image();
   loadedFrames: Array<string> = [];
   framePrefix: string = "data:image/png;base64,";
-  actualIndex: number = 0
+  actualIndex: number = 1
   frameShift: number = 1
   videoInterval: number | undefined;
   diagnosticFps: number = 10;
@@ -65,12 +65,14 @@ export class PlayerPageComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit() {
     this.loadFramesByRange(0, this.frameShift)
+    //this.loadFramesByRange(0, this.videoDto.images_count)
   }
 
   toggleDiagnosticMode(diagnosticOn: boolean, videoPreviewRef: any) {
     if (diagnosticOn) {
       this.ctx = this.diagnosticCanvas?.nativeElement.getContext('2d');
       videoPreviewRef.pause();  //pausing the [hidden] video
+      this.image.src = this.framePrefix + this.loadedFrames[1]
       this.videoPlaying = false;
       this.backwardPlay = false;
     }
@@ -94,6 +96,11 @@ export class PlayerPageComponent implements OnInit, AfterViewInit {
       })
   }
 
+  getNumberOfLoadedFrames(){
+    console.log('Loaded frames',this.loadedFrames.length - 1)
+    this.image.src = this.framePrefix + this.loadedFrames[this.loadedFrames.length - 1]
+  }
+
   loadFrameByIndex(index: number){
     this.playerRestController.onGetFrameByIndex(this.videoDto.id, index).subscribe(frame => {
       this.loadedFrames.push(frame)
@@ -101,7 +108,7 @@ export class PlayerPageComponent implements OnInit, AfterViewInit {
   }
 
   canLoadAnotherFrame(): boolean {
-    return this.loadedFrames.length < this.videoDto.images_count - 1
+    return this.loadedFrames.length - 1 < this.videoDto.images_count
   }
 
   startStopButtonClicked() {
@@ -121,7 +128,8 @@ export class PlayerPageComponent implements OnInit, AfterViewInit {
         }
         else {
           if (this.canLoadAnotherFrame()){
-            this.loadFramesByRange(this.loadedFrames.length, this.loadedFrames.length + this.frameShift)
+            console.log('upper requested value ',this.loadedFrames.length + this.frameShift + 1)
+            this.loadFramesByRange(this.loadedFrames.length, this.loadedFrames.length + this.frameShift + 1)
           }
           this.onNextFrame(true)
         }
@@ -132,39 +140,52 @@ export class PlayerPageComponent implements OnInit, AfterViewInit {
   }
 
   onNextFrameLimitReached(){
-    this.actualIndex = this.loadedFrames.length;
-    this.image.src = this.framePrefix + this.loadedFrames[this.actualIndex - 1];
-    this.toastMsg.error({detail: "ERROR", summary: "You are exceeding maximum index", duration: 3000});
-    return;
+    console.log('[LIMIT REACHED] actual index ', this.actualIndex)
+    if (this.actualIndex < this.loadedFrames.length - 1){
+      this.image.src = this.framePrefix + this.loadedFrames[this.actualIndex];
+      if ((this.actualIndex + 1 ) <= this.loadedFrames.length){
+        this.actualIndex += 1;
+      }
+      else{
+        this.actualIndex = this.loadedFrames.length - 1;
+        this.toastMsg.error({detail: "ERROR", summary: "You are exceeding maximum index", duration: 3000});
+      }
+    }
+    this.image.src = this.framePrefix + this.loadedFrames[this.actualIndex];
   }
 
   onPreviousFrameLimitReached(){
     this.actualIndex = 0;
     this.image.src = this.framePrefix + this.loadedFrames[this.actualIndex];
     this.toastMsg.error({detail: "ERROR", summary: "You are trying to access index lower than 0", duration: 3000});
-    return;
   }
 
   onNextFrame(autoPlay: boolean){
-    if (this.actualIndex + this.frameShift > this.loadedFrames.length - 1) this.onNextFrameLimitReached()
+    if (this.actualIndex + this.frameShift > this.loadedFrames.length - 1) {
+      this.onNextFrameLimitReached();
+      return;
+    }
     if (autoPlay){
       this.actualIndex += this.frameShift;
     } else {
       if (this.canLoadAnotherFrame()) this.loadFrameByIndex(this.loadedFrames.length + 1)
-      this.actualIndex += 1
-      console.log(`%c${this.actualIndex}`, "color: green")
+      this.actualIndex += 1;
     }
+    console.log(`%c actual index ${this.actualIndex}`, "color: green")
     this.image.src = this.framePrefix + this.loadedFrames[this.actualIndex];
   }
 
   onPreviousFrame(autoPlay: boolean){
-    if (this.actualIndex - this.frameShift < 0) this.onPreviousFrameLimitReached()
+    if (this.actualIndex - this.frameShift < 0) {
+      this.onPreviousFrameLimitReached();
+      return;
+    }
     if (autoPlay){
       this.actualIndex -= this.frameShift;
     } else {
       this.actualIndex -= 1
-      console.log(`%c${this.actualIndex}`, "color: red")
     }
+    console.log(`%c actual index ${this.actualIndex}`, "color: red")
     this.image.src = this.framePrefix + this.loadedFrames[this.actualIndex];
   }
 
