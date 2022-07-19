@@ -29,7 +29,7 @@
 
       <div class="footer">
         <div class="footer-left-section">
-          <label *ngIf="diagnosticMode">Actual frame: {{actualIndex}}</label>
+          <label *ngIf="diagnosticMode">FRAME: {{actualIndex}}</label>
         </div>
         <div class="footer-mid-section">
 
@@ -47,7 +47,8 @@
                 <mat-icon matTooltip="{{enumRef.MSG1}}">keyboard_arrow_left</mat-icon>
               </ng-template>
             </button>
-            <button class="player-button" mat-raised-button matTooltip="{{enumRef.MSG2}}" (click)="onPreviousFrame()">
+            <button class="player-button" mat-raised-button matTooltip="{{enumRef.MSG2}}" (click)="onPreviousFrame()"
+                    [disabled]="videoPlaying">
               <mat-icon>skip_previous</mat-icon>
             </button>
             <button (click)="startStopButtonClicked()" class="player-button" mat-raised-button
@@ -57,7 +58,8 @@
                 <mat-icon>play_arrow</mat-icon>
               </ng-template>
             </button>
-            <button class="player-button" mat-raised-button matTooltip="{{enumRef.MSG4}}" (click)="onNextFrame()">
+            <button class="player-button" mat-raised-button matTooltip="{{enumRef.MSG4}}" (click)="onNextFrame()"
+                    [disabled]="videoPlaying">
               <mat-icon>skip_next</mat-icon>
             </button>
             <button class="player-button" mat-raised-button matTooltip="{{enumRef.MSG5}}">

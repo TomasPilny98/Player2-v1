@@ -25,7 +25,8 @@ export class PlayerPageComponent implements OnInit, AfterViewInit {
   actualIndex: number = 0
   frameShift: number = 1
   videoInterval: number | undefined;
-  diagnosticFps: number = 1000 / 15;
+  diagnosticFps: number = 10;
+  diagnosticTimeout: number = 1000 / this.diagnosticFps;
   loadedVideo: any | undefined;
   private ctx: CanvasRenderingContext2D | undefined;
 
@@ -36,7 +37,6 @@ export class PlayerPageComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit(): void {
-
     this.activatedRoute.queryParams.subscribe(params => {
       this.videoDto = new VideoDto(
         params['id'],
@@ -49,8 +49,9 @@ export class PlayerPageComponent implements OnInit, AfterViewInit {
         params['trigger_timestamp'],
         params['signal_request'],
         '')
-      this.loadedFrames = new Array(this.videoDto.images_count)
     })
+
+    this.loadedFrames = new Array(this.videoDto.images_count)
 
     this.image.onload = function () {
       image_load()
@@ -62,7 +63,7 @@ export class PlayerPageComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit() {
-    this.getFramesByRange().then()
+    this.getFramesByRange(0, 10).then()
     //this.getVideoPreviewMp4().then()
   }
 
@@ -81,21 +82,33 @@ export class PlayerPageComponent implements OnInit, AfterViewInit {
   }
 
   //TODO handle errors in case this call fails
-  async getFramesByRange() {
+  async getFramesByRange(firstFrame: number, lastFrame: number) {
     this.toastMsg.info({
       detail: "Loading video",
       summary: "video id: " + this.videoDto.id.toString(),
       duration: 3000
     })
-    await this.playerRestController.onGetFramesByRange(this.videoDto.id, 0, this.videoDto.images_count - 1)
+    await this.playerRestController.onGetFramesByRange(this.videoDto.id, firstFrame, lastFrame)
       .subscribe(received_images => {
-        this.loadedFrames = received_images;
+        for (let frame of received_images){
+          this.loadedFrames.push(frame);
+        }
+        //console.log(this.loadedFrames.length, this.loadedFrames)
         this.toastMsg.success({
           detail: "Success",
           summary: "video id: " + this.videoDto.id.toString() + " successfully loaded",
           duration: 3000
         })
       })
+  }
+
+  canAddFramesByRange(): boolean {
+    return this.loadedFrames.length < this.videoDto.images_count - 1
+  }
+
+  addFramesByRange() {
+    this.getFramesByRange(this.loadedFrames.length, this.loadedFrames.length + this.diagnosticFps).then()
+    console.log(this.loadedFrames.length)
   }
 
   async getVideoPreviewMp4() {
@@ -118,11 +131,14 @@ export class PlayerPageComponent implements OnInit, AfterViewInit {
   playVideo(){
     if (this.videoPlaying){
       this.videoInterval = setInterval(() => {
-        if (this.backwardPlay)
+        if (this.backwardPlay){
           this.onPreviousFrame()
-        else
+        }
+        else {
+          if (this.canAddFramesByRange()) this.addFramesByRange()
           this.onNextFrame()
-      }, this.diagnosticFps)
+        }
+      }, this.diagnosticTimeout)
     } else {
       clearInterval(this.videoInterval)
     }

@@ -1,7 +1,6 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {FormControl} from "@angular/forms";
 import {PlayerRestController} from "../rest/player-rest-controller";
-import {VideoPreviewDirective} from "../video-preview.directive";
 
 import {VideoDto} from "../video/model";
 
@@ -11,7 +10,6 @@ import {VideoDto} from "../video/model";
   styleUrls: ['./loading-page.component.scss']
 })
 export class LoadingPageComponent implements OnInit {
-  @ViewChild(VideoPreviewDirective, {static: true}) videoPreviewHost!: VideoPreviewDirective;
 
   videoDtoArray: Array<VideoDto> = new Array<VideoDto>();
   cameras: FormControl = new FormControl('');
