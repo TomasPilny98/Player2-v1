@@ -155,9 +155,14 @@ export class PlayerPageComponent implements OnInit, AfterViewInit {
   }
 
   onPreviousFrameLimitReached(){
-    this.actualIndex = 0;
-    this.image.src = this.framePrefix + this.loadedFrames[this.actualIndex];
-    this.toastMsg.error({detail: "ERROR", summary: "You are trying to access index lower than 0", duration: 3000});
+    console.log(`%c actual index ${this.actualIndex}`, "color: red")
+    if (this.actualIndex - 1 >= 1) {
+      this.actualIndex -= 1;
+      this.image.src = this.framePrefix + this.loadedFrames[this.actualIndex];
+    } else {
+      this.actualIndex = 1
+      this.toastMsg.error({detail: "ERROR", summary: "You are trying to access index lower than 0", duration: 3000});
+    }
   }
 
   onNextFrame(autoPlay: boolean){
