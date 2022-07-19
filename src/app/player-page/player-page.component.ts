@@ -64,7 +64,7 @@ export class PlayerPageComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit() {
-    this.getFramesByRange(0, this.frameShift)
+    this.loadFramesByRange(0, this.frameShift)
   }
 
   toggleDiagnosticMode(diagnosticOn: boolean, videoPreviewRef: any) {
@@ -77,12 +77,15 @@ export class PlayerPageComponent implements OnInit, AfterViewInit {
     this.diagnosticMode = !this.diagnosticMode;
   }
 
+  setFrameShift(){
+    this.frameShift = Math.floor(this.videoDto.frame_rate / this.diagnosticFps)
+  }
+
   setCurrentTime(data: any) {
     this.currentTime = data.target.currentTime;
   }
 
-  //TODO handle errors in case this call fails
-  getFramesByRange(firstFrame: number, lastFrame: number) {
+  loadFramesByRange(firstFrame: number, lastFrame: number) {
     this.playerRestController.onGetFramesByRange(this.videoDto.id, firstFrame, lastFrame)
       .subscribe(received_images => {
         for (let frame of received_images){
@@ -91,35 +94,14 @@ export class PlayerPageComponent implements OnInit, AfterViewInit {
       })
   }
 
-  getFrameArrayLength(){
-    console.log(this.loadedFrames.length)
-  }
-
-  setFrameShift(){
-    this.frameShift = Math.floor(this.videoDto.frame_rate / this.diagnosticFps)
-  }
-
-  getFrameByIndex(index: number){
+  loadFrameByIndex(index: number){
     this.playerRestController.onGetFrameByIndex(this.videoDto.id, index).subscribe(frame => {
       this.loadedFrames.push(frame)
     })
   }
 
-  canAddFramesByRange(): boolean {
+  canLoadAnotherFrame(): boolean {
     return this.loadedFrames.length < this.videoDto.images_count - 1
-  }
-
-  addToLoadedFrames() {
-    this.getFramesByRange(this.loadedFrames.length, this.loadedFrames.length + this.frameShift)
-    console.log(this.loadedFrames.length)
-  }
-
-  async getVideoPreviewMp4() {
-    console.log(this.videoDto.id, this.videoDto.device_id)
-    await this.playerRestController.onGetPreviewMp4(this.videoDto.id, this.videoDto.device_id)
-      .subscribe(videoFile => {
-        this.loadedVideo = videoFile
-      })
   }
 
   startStopButtonClicked() {
@@ -138,7 +120,9 @@ export class PlayerPageComponent implements OnInit, AfterViewInit {
           this.onPreviousFrame(true)
         }
         else {
-          if (this.canAddFramesByRange()) this.addToLoadedFrames()
+          if (this.canLoadAnotherFrame()){
+            this.loadFramesByRange(this.loadedFrames.length, this.loadedFrames.length + this.frameShift)
+          }
           this.onNextFrame(true)
         }
       }, this.diagnosticTimeout)
@@ -147,16 +131,26 @@ export class PlayerPageComponent implements OnInit, AfterViewInit {
     }
   }
 
+  onNextFrameLimitReached(){
+    this.actualIndex = this.loadedFrames.length;
+    this.image.src = this.framePrefix + this.loadedFrames[this.actualIndex - 1];
+    this.toastMsg.error({detail: "ERROR", summary: "You are exceeding maximum index", duration: 3000});
+    return;
+  }
+
+  onPreviousFrameLimitReached(){
+    this.actualIndex = 0;
+    this.image.src = this.framePrefix + this.loadedFrames[this.actualIndex];
+    this.toastMsg.error({detail: "ERROR", summary: "You are trying to access index lower than 0", duration: 3000});
+    return;
+  }
+
   onNextFrame(autoPlay: boolean){
-    if (this.actualIndex + this.frameShift > this.loadedFrames.length - 1) {
-      this.actualIndex = this.loadedFrames.length;
-      this.image.src = this.framePrefix + this.loadedFrames[this.actualIndex - 1];
-      this.toastMsg.error({detail: "ERROR", summary: "You are exceeding maximum index", duration: 3000});
-      return;
-    }
+    if (this.actualIndex + this.frameShift > this.loadedFrames.length - 1) this.onNextFrameLimitReached()
     if (autoPlay){
       this.actualIndex += this.frameShift;
     } else {
+      if (this.canLoadAnotherFrame()) this.loadFrameByIndex(this.loadedFrames.length + 1)
       this.actualIndex += 1
       console.log(`%c${this.actualIndex}`, "color: green")
     }
@@ -164,12 +158,7 @@ export class PlayerPageComponent implements OnInit, AfterViewInit {
   }
 
   onPreviousFrame(autoPlay: boolean){
-    if (this.actualIndex - this.frameShift < 0){
-      this.actualIndex = 0;
-      this.image.src = this.framePrefix + this.loadedFrames[this.actualIndex];
-      this.toastMsg.error({detail: "ERROR", summary: "You are trying to access index lower than 0", duration: 3000});
-      return;
-    }
+    if (this.actualIndex - this.frameShift < 0) this.onPreviousFrameLimitReached()
     if (autoPlay){
       this.actualIndex -= this.frameShift;
     } else {
