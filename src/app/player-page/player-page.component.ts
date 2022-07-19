@@ -1,10 +1,9 @@
 import {AfterViewInit, Component, ElementRef, OnInit, ViewChild} from '@angular/core';
-import {ActivatedRoute} from "@angular/router";
+import {ActivatedRoute, Router} from "@angular/router";
 import {VideoDto} from "../video/model";
 import {NgToastService} from "ng-angular-popup";
 import {ButtonMessagesEnum} from "./button-messages-enum";
 import {PlayerRestController} from "../rest/player-rest-controller";
-import {skip} from "rxjs";
 
 
 @Component({
@@ -30,12 +29,14 @@ export class PlayerPageComponent implements OnInit, AfterViewInit {
   loadedVideo: any | undefined;
   private ctx: CanvasRenderingContext2D | undefined;
 
-  constructor(private activatedRoute: ActivatedRoute,
+  constructor(private router: Router,
+              private activatedRoute: ActivatedRoute,
               private toastMsg: NgToastService,
               private playerRestController: PlayerRestController) {
   }
 
   ngOnInit(): void {
+
     this.activatedRoute.queryParams.subscribe(params => {
       this.videoDto = new VideoDto(
         params['id'],
@@ -47,7 +48,7 @@ export class PlayerPageComponent implements OnInit, AfterViewInit {
         params['origin'],
         params['trigger_timestamp'],
         params['signal_request'],
-        params['preview'])
+        '')
       this.loadedFrames = new Array(this.videoDto.images_count)
     })
 
@@ -62,7 +63,7 @@ export class PlayerPageComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit() {
     this.getFramesByRange().then()
-    this.getVideoPreviewMp4().then()
+    //this.getVideoPreviewMp4().then()
   }
 
   toggleDiagnosticMode(diagnosticOn: boolean, videoPreviewRef: any) {

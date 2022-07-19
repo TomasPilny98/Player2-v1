@@ -19,7 +19,7 @@ export class VideoComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.Id = this.videoDto.videoId
+    this.Id = this.videoDto.id
     this.imageURL = "data:image/png;base64," + this.videoDto.preview
   }
 
@@ -33,8 +33,7 @@ export class VideoComponent implements OnInit {
         images_count: this.videoDto.images_count,
         origin: this.videoDto.origin,
         trigger_timestamp: this.videoDto.trigger_timestamp,
-        signal_request: this.videoDto.signal_request,
-        preview: this.videoDto.preview
+        signal_request: this.videoDto.signal_request
       }
     })
   }
