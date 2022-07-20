@@ -1,5 +1,5 @@
 import {AfterViewInit, Component, ElementRef, OnInit, ViewChild} from '@angular/core';
-import {ActivatedRoute, Router} from "@angular/router";
+import {ActivatedRoute} from "@angular/router";
 import {VideoDto} from "../video/model";
 import {NgToastService} from "ng-angular-popup";
 import {ButtonMessagesEnum} from "./button-messages-enum";
@@ -15,7 +15,9 @@ export class PlayerPageComponent implements OnInit, AfterViewInit {
   @ViewChild('diagnosticCanvas', {static: false}) diagnosticCanvas: ElementRef | undefined;
   videoDto: VideoDto | any;
   currentTime: number = 0;
+
   diagnosticMode: boolean = false;
+  rotationDegree: number = 0
   videoPlaying: boolean = false;
   backwardPlay: boolean = false;
   enumRef = ButtonMessagesEnum;
@@ -30,8 +32,7 @@ export class PlayerPageComponent implements OnInit, AfterViewInit {
   loadedVideo: any | undefined;
   private ctx: CanvasRenderingContext2D | undefined;
 
-  constructor(private router: Router,
-              private activatedRoute: ActivatedRoute,
+  constructor(private activatedRoute: ActivatedRoute,
               private toastMsg: NgToastService,
               private playerRestController: PlayerRestController) {
   }
@@ -65,14 +66,25 @@ export class PlayerPageComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit() {
     this.loadFramesByRange(0, this.frameShift)
-    //this.loadFramesByRange(0, this.videoDto.images_count)
+  }
+
+  getMp4(){
+    this.playerRestController.onGetPreviewMp4(this.videoDto.id, this.videoDto.device_id).subscribe(video => {
+      this.loadedVideo = video;
+    })
+  }
+
+  onRotateFrameClicked(){
+    this.rotationDegree -= 90;
+    let canvas = document.getElementById('diagnosticCanvas');
+    canvas!.style.transform = 'rotate(' + this.rotationDegree + 'deg)';
   }
 
   toggleDiagnosticMode(diagnosticOn: boolean, videoPreviewRef: any) {
     if (diagnosticOn) {
       this.ctx = this.diagnosticCanvas?.nativeElement.getContext('2d');
       videoPreviewRef.pause();  //pausing the [hidden] video
-      this.image.src = this.framePrefix + this.loadedFrames[1]
+      this.image.src = this.framePrefix + this.loadedFrames[this.actualIndex]
       this.videoPlaying = false;
       this.backwardPlay = false;
     }
@@ -94,11 +106,6 @@ export class PlayerPageComponent implements OnInit, AfterViewInit {
           this.loadedFrames.push(frame);
         }
       })
-  }
-
-  getNumberOfLoadedFrames(){
-    console.log('Loaded frames',this.loadedFrames.length - 1)
-    this.image.src = this.framePrefix + this.loadedFrames[this.loadedFrames.length - 1]
   }
 
   loadFrameByIndex(index: number){

@@ -3,6 +3,7 @@ import {FormControl} from "@angular/forms";
 import {PlayerRestController} from "../rest/player-rest-controller";
 
 import {VideoDto} from "../video/model";
+import {NgToastService} from "ng-angular-popup";
 
 @Component({
   selector: 'app-loading-page',
@@ -12,13 +13,13 @@ import {VideoDto} from "../video/model";
 export class LoadingPageComponent implements OnInit {
 
   videoDtoArray: Array<VideoDto> = new Array<VideoDto>();
-  cameras: FormControl = new FormControl('');
+  selectedCamerasForm: FormControl = new FormControl('');
   camerasList: string[] = [];
-  selectedCameras: string[] = [];
   startDate: string | null = null;
   endDate: string | null = null;
 
-  constructor(private playerRestController: PlayerRestController) {
+  constructor(private playerRestController: PlayerRestController,
+              private toastMsg: NgToastService) {
   }
 
   ngOnInit(): void {
@@ -31,22 +32,49 @@ export class LoadingPageComponent implements OnInit {
     })
   }
 
+  onDateSelectChange(value: any, startDate: boolean) {
+    if (startDate)
+      this.startDate = value
+    else
+      this.endDate = value
+    console.log("start: ", this.startDate)
+    console.log("end: ", this.endDate)
+  }
+
   onClearButtonClicked() {
-    this.videoDtoArray.splice(0)
+    if (this.videoDtoArray.length == 0)
+      this.toastMsg.info({detail: "Page does not have any records loaded", duration: 5000});
+    else
+      this.videoDtoArray.splice(0)
   }
 
   onSearchButtonClicked(): void {
-    /*this.playerRestController.onFilterVideosByDateAndIds(
-      this.startDate,
-      this.endDate,
-      this.selectedCameras).subscribe(metadataDtoArray => {
-      this.videoDtoArray = metadataDtoArray
-    })*/
+    if ((this.startDate == null && this.endDate == null && this.selectedCamerasForm.value == '') ||
+      (this.startDate == null && this.endDate != null) || (this.startDate != null && this.endDate == null)){
+      this.toastMsg.error({
+        detail: "No values selected",
+        summary: "Choose date or select camera",
+        duration: 5000 });
+    }
+    else {
 
-    // this is here for  testing purpose only
+    }
+  }
+
+  getAllRecordings() {
     this.playerRestController.onGetAllVideosMetadata().subscribe(metadata => {
-      this.videoDtoArray = metadata
       console.log(metadata)
+      this.videoDtoArray = metadata
+      if (this.videoDtoArray == null)
+        this.toastMsg.warning({
+          detail: "WARNING",
+          summary: "Server does not contain any video records",
+          duration: 5000
+        });
+
     })
   }
+
 }
+
+//TODO sort by, show only (from already loaded videos)

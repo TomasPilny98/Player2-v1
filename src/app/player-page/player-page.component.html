@@ -13,7 +13,7 @@
   <div class="body">
     <div class="left-bar"><p>Video previews</p>
       <div class="video-previews">
-        <ng-template videoPreviewHost></ng-template>
+        previews placeholder
       </div>
     </div>
 
@@ -22,9 +22,11 @@
         <video #videoRefPause (timeupdate)="setCurrentTime($event)" [hidden]="diagnosticMode" controls>
           <source src="{{loadedVideo}}" type="video/mp4">
         </video>
-        <canvas #diagnosticCanvas [hidden]="!diagnosticMode"
-                height="600" id="diagnosticCanvas" style="background-color: lightblue" width="800">
-        </canvas>
+        <div>
+          <canvas #diagnosticCanvas [hidden]="!diagnosticMode"
+                  height="600" id="diagnosticCanvas" style="background-color: lightblue" width="800">
+          </canvas>
+        </div>
       </div>
 
       <div class="footer">
@@ -62,7 +64,7 @@
                     [disabled]="videoPlaying">
               <mat-icon>skip_next</mat-icon>
             </button>
-            <button class="player-button" mat-raised-button matTooltip="{{enumRef.MSG5}}" (click)="getNumberOfLoadedFrames()">
+            <button class="player-button" mat-raised-button matTooltip="{{enumRef.MSG5}}" (click)="onRotateFrameClicked()">
               <mat-icon>rotate_90_degrees_ccw</mat-icon>
             </button>
           </ng-template>

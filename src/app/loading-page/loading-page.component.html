@@ -6,8 +6,8 @@
     <mat-form-field appearance="fill">
       <mat-label>Enter a date range</mat-label>
       <mat-date-range-input [rangePicker]="picker">
-        <input matStartDate placeholder="Start date">
-        <input matEndDate placeholder="End date">
+        <input matStartDate placeholder="Start date" (dateChange)="onDateSelectChange($event.value, true)">
+        <input matEndDate placeholder="End date" (dateChange)="onDateSelectChange($event.value, false)">
       </mat-date-range-input>
       <mat-hint>MM/DD/YYYY – MM/DD/YYYY</mat-hint>
       <mat-datepicker-toggle [for]="picker" matSuffix></mat-datepicker-toggle>
@@ -16,13 +16,7 @@
 
     <mat-form-field appearance="fill" style="margin-left: 30px">
       <mat-label>Select cameras</mat-label>
-      <mat-select [formControl]="cameras" multiple>
-        <mat-select-trigger>
-          {{cameras.value?.[0] || ''}}
-          <span *ngIf="(cameras.value?.length || 0) > 1" class="example-additional-selection">
-        (+{{(cameras.value?.length || 0) - 1}} {{cameras.value?.length === 2 ? 'other' : 'others'}})
-      </span>
-        </mat-select-trigger>
+      <mat-select [formControl]="selectedCamerasForm" multiple>
         <mat-option *ngFor="let camera of camerasList" [value]="camera">{{camera}}</mat-option>
       </mat-select>
     </mat-form-field>
@@ -51,8 +45,8 @@
 
 
 <div class="footer">
-  <button (click)="onSearchButtonClicked()" class="load-more-button" color="basic"
-          mat-fab matTooltip="Load X more videos" matTooltipPosition="above">
+  <button (click)="getAllRecordings()" class="load-more-button" color="basic"
+          mat-fab matTooltip="Load all videos" matTooltipPosition="above">
     <mat-icon>keyboard_arrow_down</mat-icon>
   </button>
 </div>

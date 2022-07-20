@@ -15,9 +15,9 @@ export class PlayerRestController {
     return this.http.post<any>('http://127.0.0.1:5000/metadata/get-all-cameras-id', {})
   }
 
-  onFilterVideosByDateAndIds(video_id: string, dateStart: string | null, dateEnd: string | null, deviceId: string[]) {
-    return this.http.post<any>('http://127.0.0.1:5000/metadata/get-all-videos-by-date',
-      {video_id, dateStart, dateEnd, deviceId})
+  onFilterVideosByDateAndIds(start: string | null, end: string | null, device_id_array: string[]) {
+    return this.http.post<any>('http://127.0.0.1:5000/metadata/get-all-videos-by-date-and-ids',
+      {start, end, device_id_array})
   }
 
   onGetFrameByIndex(video_id: string, index: number) {
@@ -37,7 +37,7 @@ export class PlayerRestController {
   }
 
   onGetPreviewMp4(video_id: number, device_id: string) {
-    return this.http.post<any>('http://127.0.0.1:5000/player/get-video-preview-mp4', {video_id, device_id})
+    return this.http.post<any>('http://127.0.0.1:5000/player/get-mp4', {video_id, device_id})
   }
 
 }
