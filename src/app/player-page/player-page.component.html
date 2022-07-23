@@ -22,12 +22,17 @@
         <video #videoRefPause (timeupdate)="setCurrentTime($event)" [hidden]="diagnosticMode">
           <source src="{{loadedVideo}}" type="video/mp4">
         </video>
-        <canvas #diagnosticCanvas [hidden]="!diagnosticMode"
-                height="600" id="diagnosticCanvas" style="background-color: lightblue" width="800">
-        </canvas>
+        <div *ngIf="!downloadedFlag; else canvasDiv">
+          Waiting for video...
+        </div>
+        <ng-template #canvasDiv>
+          <canvas #diagnosticCanvas [hidden]="!diagnosticMode" id="diagnosticCanvas"
+                  style="background-color: lightgrey">
+          </canvas>
+        </ng-template>
       </div>
       <div class="timeline">
-        <ngx-slider [(value)]="diagnosticCurrentTime" [options]="optionsSingle"
+        <ngx-slider [(value)]="diagnosticCurrentTime" [options]="optionsSingle" class="custom-slider"
                     (userChange)="updateLastFrameForTimeline()"></ngx-slider>
       </div>
 
@@ -51,7 +56,8 @@
                 <mat-icon matTooltip="{{enumRef.MSG1}}">keyboard_arrow_left</mat-icon>
               </ng-template>
             </button>
-            <button class="player-button" mat-raised-button matTooltip="{{enumRef.MSG2}}" (click)="onPreviousFrame(false)"
+            <button class="player-button" mat-raised-button matTooltip="{{enumRef.MSG2}}"
+                    (click)="onPreviousFrame(false)"
                     [disabled]="videoPlaying">
               <mat-icon>skip_previous</mat-icon>
             </button>
@@ -66,7 +72,8 @@
                     [disabled]="videoPlaying">
               <mat-icon>skip_next</mat-icon>
             </button>
-            <button class="player-button" mat-raised-button matTooltip="{{enumRef.MSG5}}" (click)="onRotateFrameClicked()">
+            <button class="player-button" mat-raised-button matTooltip="{{enumRef.MSG5}}"
+                    (click)="onRotateFrameClicked()">
               <mat-icon>rotate_90_degrees_ccw</mat-icon>
             </button>
           </ng-template>

@@ -16,6 +16,8 @@ import {HttpClientModule} from '@angular/common/http';
 import {MatTooltipModule} from "@angular/material/tooltip";
 import {NgToastModule} from "ng-angular-popup";
 import {NgxSliderModule} from "@angular-slider/ngx-slider";
+import {MatProgressSpinnerModule} from "@angular/material/progress-spinner";
+import {MatToolbarModule} from "@angular/material/toolbar";
 
 
 @NgModule({
@@ -40,7 +42,9 @@ import {NgxSliderModule} from "@angular-slider/ngx-slider";
     HttpClientModule,
     MatTooltipModule,
     NgToastModule,
-    NgxSliderModule
+    NgxSliderModule,
+    MatProgressSpinnerModule,
+    MatToolbarModule
 
   ],
   providers: [],

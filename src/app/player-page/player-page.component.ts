@@ -12,13 +12,13 @@ import {Options} from '@angular-slider/ngx-slider';
   templateUrl: './player-page.component.html',
   styleUrls: ['./player-page.component.scss']
 })
-export class PlayerPageComponent implements OnInit, AfterViewInit {
+export class PlayerPageComponent implements OnInit {
   @ViewChild('diagnosticCanvas', {static: false}) diagnosticCanvas: ElementRef | undefined;
   videoDto: VideoDto | any;
   smallVideoCurrentTime: number = 0;
   diagnosticCurrentTime: number = 0;
   recSize: number | undefined;
-  diagnosticMode: boolean = false;
+  diagnosticMode: boolean = true;
   rotationDegree: number = 0
   videoPlaying: boolean = false;
   backwardPlay: boolean = false;
@@ -33,6 +33,7 @@ export class PlayerPageComponent implements OnInit, AfterViewInit {
   diagnosticTimeout: number = 1000 / this.diagnosticFps;
   loadedVideo: any | undefined = './assets/artificialPreviews/video5.mp4'
   private ctx: CanvasRenderingContext2D | undefined;
+  downloadedFlag: boolean = false;
 
   optionsSingle: Options = {
     floor: 0,
@@ -73,12 +74,28 @@ export class PlayerPageComponent implements OnInit, AfterViewInit {
     };
 
     const image_load = () => {
-      this.ctx!.drawImage(this.image, 0, 0, 800, 600);
+      this.ctx = this.diagnosticCanvas?.nativeElement.getContext('2d');
+      let scaledSizes = this.calculateDownscale(this.image.width, this.image.height, 50);
+      this.ctx!.canvas.width = scaledSizes[0];
+      this.ctx!.canvas.height = scaledSizes[1];
+      this.ctx!.drawImage(this.image, 0, 0, scaledSizes[0], scaledSizes[1]);
     }
+
+    this.loadFirstFrame();
+    this.loadFramesByRange(1, this.videoDto.images_count).then();
   }
 
-  ngAfterViewInit() {
-    this.loadFramesByRange(0, this.videoDto.images_count).then();
+  calculateDownscale(width: number, height: number, scalePercentage: number): number[] {
+    let scaledWidth: number = width;
+    let scaledHeight: number = height;
+    if (width > 1000) {
+      let pixel: number = (width * height * scalePercentage) / 100;
+      let wRatio: number = height / width;
+      let hRatio: number = width / height;
+      scaledWidth = Math.sqrt(pixel / wRatio);
+      scaledHeight = Math.sqrt(pixel / hRatio);
+    }
+    return [scaledWidth, scaledHeight]
   }
 
   updateTimeForTimeline() {
@@ -105,9 +122,7 @@ export class PlayerPageComponent implements OnInit, AfterViewInit {
 
   toggleDiagnosticMode(diagnosticOn: boolean, videoPreviewRef: any) {
     if (diagnosticOn) {
-      this.ctx = this.diagnosticCanvas?.nativeElement.getContext('2d');
       videoPreviewRef.pause();  //pausing the [hidden] video
-      this.image.src = this.framePrefix + this.loadedFrames[this.actualIndex]
       this.videoPlaying = false;
       this.backwardPlay = false;
     }
@@ -138,12 +153,21 @@ export class PlayerPageComponent implements OnInit, AfterViewInit {
           summary: "Video " + this.videoDto.id.toString() + " downloaded successfully",
           duration: 3000
         });
+        this.downloadedFlag = true;
+        this.image.src = this.framePrefix + this.loadedFrames[1];
       })
   }
 
   loadFrameByIndex(index: number) {
     this.playerRestController.onGetFrameByIndex(this.videoDto.id, index).subscribe(frame => {
       this.loadedFrames.push(frame)
+    })
+  }
+
+  loadFirstFrame() {
+    this.playerRestController.onGetFrameByIndex(this.videoDto.id, 0).subscribe(frame => {
+      this.loadedFrames.push(frame)
+
     })
   }
 
@@ -172,6 +196,7 @@ export class PlayerPageComponent implements OnInit, AfterViewInit {
             this.loadFramesByRange(this.loadedFrames.length, this.loadedFrames.length + this.frameShift + 1).then();
           }
           this.onNextFrame(true)
+          console.log(this.image.width, this.image.height)
         }
       }, this.diagnosticTimeout)
     } else {
@@ -202,6 +227,8 @@ export class PlayerPageComponent implements OnInit, AfterViewInit {
       this.image.src = this.framePrefix + this.loadedFrames[this.actualIndex];
     } else {
       this.actualIndex = 1
+      this.startStopButtonClicked(true, false);
+      this.backwardPlay = false;
       this.toastMsg.error({detail: "ERROR", summary: "You are trying to access index lower than 0", duration: 3000});
     }
     this.updateTimeForTimeline();
