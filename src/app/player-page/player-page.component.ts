@@ -4,6 +4,7 @@ import {VideoDto} from "../video/model";
 import {NgToastService} from "ng-angular-popup";
 import {ButtonMessagesEnum} from "./button-messages-enum";
 import {PlayerRestController} from "../rest/player-rest-controller";
+import {Options} from '@angular-slider/ngx-slider';
 
 
 @Component({
@@ -14,8 +15,9 @@ import {PlayerRestController} from "../rest/player-rest-controller";
 export class PlayerPageComponent implements OnInit, AfterViewInit {
   @ViewChild('diagnosticCanvas', {static: false}) diagnosticCanvas: ElementRef | undefined;
   videoDto: VideoDto | any;
-  currentTime: number = 0;
-
+  smallVideoCurrentTime: number = 0;
+  diagnosticCurrentTime: number = 0;
+  recSize: number | undefined;
   diagnosticMode: boolean = false;
   rotationDegree: number = 0
   videoPlaying: boolean = false;
@@ -29,8 +31,18 @@ export class PlayerPageComponent implements OnInit, AfterViewInit {
   videoInterval: number | undefined;
   diagnosticFps: number = 10;
   diagnosticTimeout: number = 1000 / this.diagnosticFps;
-  loadedVideo: any | undefined;
+  loadedVideo: any | undefined = './assets/artificialPreviews/video5.mp4'
   private ctx: CanvasRenderingContext2D | undefined;
+
+  optionsSingle: Options = {
+    floor: 0,
+    ceil: 10,
+    step: 0.01,
+    showSelectionBar: true,
+    translate: (value: number): string => {
+      return value + 's';
+    }
+  };
 
   constructor(private activatedRoute: ActivatedRoute,
               private toastMsg: NgToastService,
@@ -51,8 +63,9 @@ export class PlayerPageComponent implements OnInit, AfterViewInit {
         params['signal_request'],
         '')
     })
+    this.recSize = this.videoDto.images_count / this.videoDto.frame_rate;
+    this.optionsSingle.ceil = this.recSize;
     this.setFrameShift()
-
     this.loadedFrames = new Array(this.videoDto.images_count)
 
     this.image.onload = function () {
@@ -65,16 +78,26 @@ export class PlayerPageComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit() {
-    this.loadFramesByRange(0, this.frameShift)
+    this.loadFramesByRange(0, this.videoDto.images_count).then();
   }
 
-  getMp4(){
+  updateTimeForTimeline() {
+    this.diagnosticCurrentTime = (this.recSize! * this.actualIndex) / this.videoDto.images_count;
+  }
+
+  updateLastFrameForTimeline() {
+    this.startStopButtonClicked(true, false);
+    this.actualIndex = Math.floor((this.diagnosticCurrentTime * this.videoDto.images_count) / this.recSize!)
+    this.startStopButtonClicked(true, true);
+  }
+
+  getMp4() {
     this.playerRestController.onGetPreviewMp4(this.videoDto.id, this.videoDto.device_id).subscribe(video => {
       this.loadedVideo = video;
     })
   }
 
-  onRotateFrameClicked(){
+  onRotateFrameClicked() {
     this.rotationDegree -= 90;
     let canvas = document.getElementById('diagnosticCanvas');
     canvas!.style.transform = 'rotate(' + this.rotationDegree + 'deg)';
@@ -91,24 +114,34 @@ export class PlayerPageComponent implements OnInit, AfterViewInit {
     this.diagnosticMode = !this.diagnosticMode;
   }
 
-  setFrameShift(){
+  setFrameShift() {
     this.frameShift = Math.floor(this.videoDto.frame_rate / this.diagnosticFps)
   }
 
   setCurrentTime(data: any) {
-    this.currentTime = data.target.currentTime;
+    this.smallVideoCurrentTime = data.target.currentTime;
   }
 
-  loadFramesByRange(firstFrame: number, lastFrame: number) {
-    this.playerRestController.onGetFramesByRange(this.videoDto.id, firstFrame, lastFrame)
+  async loadFramesByRange(firstFrame: number, lastFrame: number) {
+    this.toastMsg.info({
+      detail: "DOWNLOADING VIDEO FROM SERVER",
+      summary: "Video " + this.videoDto.id.toString() + " is being downloaded",
+      duration: 3000
+    });
+    await this.playerRestController.onGetFramesByRange(this.videoDto.id, firstFrame, lastFrame)
       .subscribe(received_images => {
-        for (let frame of received_images){
+        for (let frame of received_images) {
           this.loadedFrames.push(frame);
         }
+        this.toastMsg.success({
+          detail: "DOWNLOAD DONE",
+          summary: "Video " + this.videoDto.id.toString() + " downloaded successfully",
+          duration: 3000
+        });
       })
   }
 
-  loadFrameByIndex(index: number){
+  loadFrameByIndex(index: number) {
     this.playerRestController.onGetFrameByIndex(this.videoDto.id, index).subscribe(frame => {
       this.loadedFrames.push(frame)
     })
@@ -118,25 +151,25 @@ export class PlayerPageComponent implements OnInit, AfterViewInit {
     return this.loadedFrames.length - 1 < this.videoDto.images_count
   }
 
-  startStopButtonClicked() {
-    this.videoPlaying = !this.videoPlaying;
-    this.playVideo()
+  startStopButtonClicked(timeLineControl: boolean, videoPlaying: any = null) {
+    if (timeLineControl) this.videoPlaying = videoPlaying;
+    else this.videoPlaying = !this.videoPlaying;
+    this.playVideo();
   }
 
   backwardButtonClicked() {
     this.backwardPlay = !this.backwardPlay;
   }
 
-  playVideo(){
-    if (this.videoPlaying){
+  playVideo() {
+    if (this.videoPlaying) {
       this.videoInterval = setInterval(() => {
-        if (this.backwardPlay){
+        if (this.backwardPlay) {
           this.onPreviousFrame(true)
-        }
-        else {
-          if (this.canLoadAnotherFrame()){
-            console.log('upper requested value ',this.loadedFrames.length + this.frameShift + 1)
-            this.loadFramesByRange(this.loadedFrames.length, this.loadedFrames.length + this.frameShift + 1)
+        } else {
+          if (this.canLoadAnotherFrame()) {
+            console.log('upper requested value ', this.loadedFrames.length + this.frameShift + 1)
+            this.loadFramesByRange(this.loadedFrames.length, this.loadedFrames.length + this.frameShift + 1).then();
           }
           this.onNextFrame(true)
         }
@@ -146,22 +179,23 @@ export class PlayerPageComponent implements OnInit, AfterViewInit {
     }
   }
 
-  onNextFrameLimitReached(){
+  onNextFrameLimitReached() {
     console.log('[LIMIT REACHED] actual index ', this.actualIndex)
-    if (this.actualIndex < this.loadedFrames.length - 1){
+    if (this.actualIndex == this.videoDto.images_count) this.startStopButtonClicked(true, false);
+    if (this.actualIndex < this.loadedFrames.length - 1) {
       this.image.src = this.framePrefix + this.loadedFrames[this.actualIndex];
-      if ((this.actualIndex + 1 ) <= this.loadedFrames.length){
+      if ((this.actualIndex + 1) < this.loadedFrames.length) {
         this.actualIndex += 1;
-      }
-      else{
+      } else {
         this.actualIndex = this.loadedFrames.length - 1;
         this.toastMsg.error({detail: "ERROR", summary: "You are exceeding maximum index", duration: 3000});
       }
     }
+    this.updateTimeForTimeline();
     this.image.src = this.framePrefix + this.loadedFrames[this.actualIndex];
   }
 
-  onPreviousFrameLimitReached(){
+  onPreviousFrameLimitReached() {
     console.log(`%c actual index ${this.actualIndex}`, "color: red")
     if (this.actualIndex - 1 >= 1) {
       this.actualIndex -= 1;
@@ -170,33 +204,36 @@ export class PlayerPageComponent implements OnInit, AfterViewInit {
       this.actualIndex = 1
       this.toastMsg.error({detail: "ERROR", summary: "You are trying to access index lower than 0", duration: 3000});
     }
+    this.updateTimeForTimeline();
   }
 
-  onNextFrame(autoPlay: boolean){
+  onNextFrame(autoPlay: boolean) {
     if (this.actualIndex + this.frameShift > this.loadedFrames.length - 1) {
       this.onNextFrameLimitReached();
       return;
     }
-    if (autoPlay){
+    if (autoPlay) {
       this.actualIndex += this.frameShift;
     } else {
       if (this.canLoadAnotherFrame()) this.loadFrameByIndex(this.loadedFrames.length + 1)
       this.actualIndex += 1;
     }
+    this.updateTimeForTimeline();
     console.log(`%c actual index ${this.actualIndex}`, "color: green")
     this.image.src = this.framePrefix + this.loadedFrames[this.actualIndex];
   }
 
-  onPreviousFrame(autoPlay: boolean){
+  onPreviousFrame(autoPlay: boolean) {
     if (this.actualIndex - this.frameShift < 0) {
       this.onPreviousFrameLimitReached();
       return;
     }
-    if (autoPlay){
+    if (autoPlay) {
       this.actualIndex -= this.frameShift;
     } else {
       this.actualIndex -= 1
     }
+    this.updateTimeForTimeline();
     console.log(`%c actual index ${this.actualIndex}`, "color: red")
     this.image.src = this.framePrefix + this.loadedFrames[this.actualIndex];
   }

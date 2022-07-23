@@ -19,14 +19,16 @@
 
     <div class="right-section" id="right-section">
       <div class="video-section" id="video-section">
-        <video #videoRefPause (timeupdate)="setCurrentTime($event)" [hidden]="diagnosticMode" controls>
+        <video #videoRefPause (timeupdate)="setCurrentTime($event)" [hidden]="diagnosticMode">
           <source src="{{loadedVideo}}" type="video/mp4">
         </video>
-        <div>
-          <canvas #diagnosticCanvas [hidden]="!diagnosticMode"
-                  height="600" id="diagnosticCanvas" style="background-color: lightblue" width="800">
-          </canvas>
-        </div>
+        <canvas #diagnosticCanvas [hidden]="!diagnosticMode"
+                height="600" id="diagnosticCanvas" style="background-color: lightblue" width="800">
+        </canvas>
+      </div>
+      <div class="timeline">
+        <ngx-slider [(value)]="diagnosticCurrentTime" [options]="optionsSingle"
+                    (userChange)="updateLastFrameForTimeline()"></ngx-slider>
       </div>
 
       <div class="footer">
@@ -38,7 +40,7 @@
           <div (click)="toggleDiagnosticMode(true, videoRefPause)" *ngIf="!diagnosticMode; else diagnosticButtons"
                class="diagnostic">
             <p>Diagnostic mode</p>
-            <label>(start at: {{currentTime.toFixed(1)}}s)</label>
+            <label>(start at: {{smallVideoCurrentTime.toFixed(1)}}s)</label>
           </div>
 
           <ng-template #diagnosticButtons>
@@ -53,7 +55,7 @@
                     [disabled]="videoPlaying">
               <mat-icon>skip_previous</mat-icon>
             </button>
-            <button (click)="startStopButtonClicked()" class="player-button" mat-raised-button
+            <button (click)="startStopButtonClicked(false)" class="player-button" mat-raised-button
                     matTooltip="{{enumRef.MSG3}}">
               <mat-icon *ngIf="videoPlaying; else playVideo">pause</mat-icon>
               <ng-template #playVideo>

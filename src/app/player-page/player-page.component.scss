@@ -78,8 +78,16 @@
 }
 
 .video-section video {
-  min-width: 600px;
-  min-height: 400px;
+  width: 800px;
+  height: 400px;
+}
+
+.timeline {
+  display: flex;
+  height: 50px;
+  justify-content: center;
+  align-items: center;
+  padding: 0 3px 10px 3px;
 }
 
 .footer {
