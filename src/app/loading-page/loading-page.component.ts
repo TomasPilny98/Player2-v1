@@ -49,6 +49,7 @@ export class LoadingPageComponent implements OnInit {
   }
 
   onSearchButtonClicked(): void {
+    /*
     if ((this.startDate == null && this.endDate == null && this.selectedCamerasForm.value == '') ||
       (this.startDate == null && this.endDate != null) || (this.startDate != null && this.endDate == null)){
       this.toastMsg.error({
@@ -59,6 +60,8 @@ export class LoadingPageComponent implements OnInit {
     else {
 
     }
+     */
+    this.getAllRecordings();
   }
 
   getAllRecordings() {

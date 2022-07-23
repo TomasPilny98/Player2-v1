@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, ElementRef, OnInit, ViewChild} from '@angular/core';
+import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute} from "@angular/router";
 import {VideoDto} from "../video/model";
 import {NgToastService} from "ng-angular-popup";
@@ -57,7 +57,7 @@ export class PlayerPageComponent implements OnInit {
       return value + 's';
     },
     combineLabels: (minValue: string, maxValue: string): string => {
-      return 'from ' + minValue + ' up to ' + maxValue;
+      return minValue + '  -  ' + maxValue;
     }
   };
 
@@ -132,9 +132,11 @@ export class PlayerPageComponent implements OnInit {
   }
 
   updateLastFrameForTimeline() {
-    this.startStopButtonClicked(true, false);
-    this.actualIndex = Math.floor((this.diagnosticCurrentTime * this.videoDto.images_count) / this.recSize!)
-    this.startStopButtonClicked(true, true);
+    if (!this.videoLoopActive){
+      this.startStopButtonClicked(true, false);
+      this.actualIndex = Math.floor((this.diagnosticCurrentTime * this.videoDto.images_count) / this.recSize!)
+      this.startStopButtonClicked(true, true);
+    }
   }
 
   getMp4() {

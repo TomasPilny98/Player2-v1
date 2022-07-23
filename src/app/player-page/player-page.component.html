@@ -32,10 +32,10 @@
         </ng-template>
       </div>
       <div class="timeline">
-        <ngx-slider *ngIf="!videoLoopActive; else dualSlider" [(value)]="diagnosticCurrentTime" [options]="optionsSingle"
+        <ngx-slider id="slider2" *ngIf="!videoLoopActive; else dualSlider" [(value)]="diagnosticCurrentTime" [options]="optionsSingle"
                     class="custom-slider" (userChange)="updateLastFrameForTimeline()"></ngx-slider>
         <ng-template #dualSlider>
-          <ngx-slider *ngIf="videoLoopActive; else dualSlider" [(value)]="minValue" [(highValue)]="maxValue"
+          <ngx-slider id="slider1" *ngIf="videoLoopActive" [(value)]="minValue" [(highValue)]="maxValue"
                       [options]="optionsDual" class="custom-slider" (userChange)="updateLastFrameForTimeline()">
 
           </ngx-slider>
@@ -90,9 +90,6 @@
         </div>
 
         <div class="footer-right-section">
-          <button (click)="toggleDiagnosticMode(false, videoRefPause)" *ngIf="diagnosticMode" class="end-diagnostic"
-                  mat-raised-button>END DIAGNOSTIC MODE
-          </button>
         </div>
 
       </div>
