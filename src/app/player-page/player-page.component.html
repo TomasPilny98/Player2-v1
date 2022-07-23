@@ -32,8 +32,14 @@
         </ng-template>
       </div>
       <div class="timeline">
-        <ngx-slider [(value)]="diagnosticCurrentTime" [options]="optionsSingle" class="custom-slider"
-                    (userChange)="updateLastFrameForTimeline()"></ngx-slider>
+        <ngx-slider *ngIf="!videoLoopActive; else dualSlider" [(value)]="diagnosticCurrentTime" [options]="optionsSingle"
+                    class="custom-slider" (userChange)="updateLastFrameForTimeline()"></ngx-slider>
+        <ng-template #dualSlider>
+          <ngx-slider *ngIf="videoLoopActive; else dualSlider" [(value)]="minValue" [(highValue)]="maxValue"
+                      [options]="optionsDual" class="custom-slider" (userChange)="updateLastFrameForTimeline()">
+
+          </ngx-slider>
+        </ng-template>
       </div>
 
       <div class="footer">
@@ -75,6 +81,10 @@
             <button class="player-button" mat-raised-button matTooltip="{{enumRef.MSG5}}"
                     (click)="onRotateFrameClicked()">
               <mat-icon>rotate_90_degrees_ccw</mat-icon>
+            </button>
+            <button id="loopButton" class="player-button" mat-raised-button matTooltip="{{enumRef.MSG6}}"
+                    (click)="videoLoopActivated()">
+              <mat-icon>loop</mat-icon>
             </button>
           </ng-template>
         </div>

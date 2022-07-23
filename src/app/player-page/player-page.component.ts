@@ -34,6 +34,7 @@ export class PlayerPageComponent implements OnInit {
   loadedVideo: any | undefined = './assets/artificialPreviews/video5.mp4'
   private ctx: CanvasRenderingContext2D | undefined;
   downloadedFlag: boolean = false;
+  videoLoopActive: boolean = false;
 
   optionsSingle: Options = {
     floor: 0,
@@ -42,6 +43,21 @@ export class PlayerPageComponent implements OnInit {
     showSelectionBar: true,
     translate: (value: number): string => {
       return value + 's';
+    }
+  };
+
+  minValue: number = 0;
+  maxValue: number = 0;
+  optionsDual: Options = {
+    floor: 0,
+    ceil: 10,
+    step: 0.01,
+    showSelectionBar: true,
+    translate: (value: number): string => {
+      return value + 's';
+    },
+    combineLabels: (minValue: string, maxValue: string): string => {
+      return 'from ' + minValue + ' up to ' + maxValue;
     }
   };
 
@@ -66,6 +82,9 @@ export class PlayerPageComponent implements OnInit {
     })
     this.recSize = this.videoDto.images_count / this.videoDto.frame_rate;
     this.optionsSingle.ceil = this.recSize;
+    this.optionsDual.ceil = this.recSize;
+    this.maxValue = (this.recSize / 2) + 10;
+    this.minValue = (this.recSize / 2) - 10;
     this.setFrameShift()
     this.loadedFrames = new Array(this.videoDto.images_count)
 
@@ -96,6 +115,16 @@ export class PlayerPageComponent implements OnInit {
       scaledHeight = Math.sqrt(pixel / hRatio);
     }
     return [scaledWidth, scaledHeight]
+  }
+
+  videoLoopActivated(){
+    this.startStopButtonClicked(true, false)
+    let button = document.getElementById('loopButton');
+    this.videoLoopActive = !this.videoLoopActive;
+    if (this.videoLoopActive)
+      button!.style.backgroundColor = 'lightgreen';
+    else
+      button!.style.backgroundColor = 'white';
   }
 
   updateTimeForTimeline() {
