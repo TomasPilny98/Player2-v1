@@ -5,5 +5,6 @@ export enum ButtonMessagesEnum {
   MSG3 = "play/pause",
   MSG4 = "go 1 frame forward",
   MSG5 = "rotate 90° left",
-  MSG6 = "create video loop"
+  MSG6 = "create video loop",
+  MSG7 = "video loop mode is active"
 }

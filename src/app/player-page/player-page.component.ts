@@ -244,7 +244,6 @@ export class PlayerPageComponent implements OnInit {
         this.actualIndex += 1;
       } else {
         this.actualIndex = this.loadedFrames.length - 1;
-        this.toastMsg.error({detail: "ERROR", summary: "You are exceeding maximum index", duration: 3000});
       }
     }
     this.updateTimeForTimeline();
@@ -260,7 +259,6 @@ export class PlayerPageComponent implements OnInit {
       this.actualIndex = 1
       this.startStopButtonClicked(true, false);
       this.backwardPlay = false;
-      this.toastMsg.error({detail: "ERROR", summary: "You are trying to access index lower than 0", duration: 3000});
     }
     this.updateTimeForTimeline();
   }
