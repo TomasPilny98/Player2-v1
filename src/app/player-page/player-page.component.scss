@@ -9,7 +9,7 @@
   justify-content: center;
   align-items: center;
   background-color: lightpink;
-  min-height: 5vh;
+  height: 50px;
   font-size: 1.3rem;
   font-weight: bold;
 }
@@ -39,14 +39,15 @@
 .body {
   display: flex;
   flex-direction: row;
-  max-height: 94.1vh;
+  height: 100%;
 }
 
 .left-bar {
-  flex: 1;
+  display: flex;
+  flex-direction: column;
+  flex: 2;
   text-align: center;
   background-color: lightblue;
-
 }
 
 .left-bar p {
@@ -57,24 +58,26 @@
 
 .video-previews {
   text-align: center;
-  max-height: 92vh;
-  flex: 1;
-  background-color: lightblue;
+  background-color: lightgreen;
   overflow-y: scroll;
-
+  flex: 1;
+  max-height: 91vh;
+  padding-left: 15px;
 }
 
 .right-section {
   display: flex;
-  flex: 6;
+  flex: 10;
   flex-direction: column;
+  min-height: 91vh;
 }
 
 .video-section {
   display: flex;
-  height: 90vh;
+  flex: 1;
   justify-content: center;
   align-items: center;
+  //min-height: 100vh; - this will put canvas to center of the page
 }
 
 .video-section video {
@@ -88,13 +91,14 @@
   justify-content: center;
   align-items: center;
   padding: 0 3px 10px 3px;
+  background-color: white;
 }
 
 .footer {
   display: flex;
   flex-direction: row;
-  height: 10vh;
-  background-color: lightpink;
+  min-height: 7vh;
+  background-color: lightgreen;
   justify-content: center;
   align-items: center;
   font-size: 0.8rem;
@@ -152,10 +156,18 @@
   opacity: 0.8;
 }
 
-mat-progress-spinner {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 5;
+.canvas-rotate-1 {
+  transform: rotate(-90deg) scale(0.7);
+}
+
+.canvas-rotate-2 {
+  transform: rotate(-180deg);
+}
+
+.canvas-rotate-3 {
+  transform: rotate(-270deg) scale(0.7);
+}
+
+.canvas-rotate-4 {
+  transform: rotate(0deg);
 }

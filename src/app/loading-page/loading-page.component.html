@@ -6,8 +6,8 @@
     <mat-form-field appearance="fill">
       <mat-label>Enter a date range</mat-label>
       <mat-date-range-input [rangePicker]="picker">
-        <input matStartDate placeholder="Start date" (dateChange)="onDateSelectChange($event.value, true)">
-        <input matEndDate placeholder="End date" (dateChange)="onDateSelectChange($event.value, false)">
+        <input matStartDate placeholder="Start date" [(ngModel)]="startDate">
+        <input matEndDate placeholder="End date" [(ngModel)]="endDate">
       </mat-date-range-input>
       <mat-hint>MM/DD/YYYY – MM/DD/YYYY</mat-hint>
       <mat-datepicker-toggle [for]="picker" matSuffix></mat-datepicker-toggle>
@@ -50,3 +50,4 @@
     <mat-icon>keyboard_arrow_down</mat-icon>
   </button>
 </div>
+

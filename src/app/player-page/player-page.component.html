@@ -13,26 +13,36 @@
   <div class="body">
     <div class="left-bar"><p>Video previews</p>
       <div class="video-previews">
-        previews placeholder
+        <div *ngIf="cameraPreviewsDtoArray && cameraPreviewsDtoArray.length > 0">
+          <div *ngFor="let metadata of cameraPreviewsDtoArray">
+            <app-video [videoDto]="metadata"></app-video>
+          </div>
+        </div>
       </div>
     </div>
 
-    <div class="right-section" id="right-section">
-      <div class="video-section" id="video-section">
+    <div class="right-section">
+      <div class="video-section">
         <video #videoRefPause (timeupdate)="setCurrentTime($event)" [hidden]="diagnosticMode">
           <source src="{{loadedVideo}}" type="video/mp4">
         </video>
         <div *ngIf="!downloadedFlag; else canvasDiv">
           Waiting for video...
         </div>
-        <ng-template #canvasDiv>
-          <canvas #diagnosticCanvas [hidden]="!diagnosticMode" id="diagnosticCanvas"
-                  style="background-color: lightgrey">
-          </canvas>
-        </ng-template>
+
+          <ng-template #canvasDiv>
+            <canvas #diagnosticCanvas [hidden]="!diagnosticMode" id="diagnosticCanvasRotate"
+            [ngClass]="{'canvas-rotate-1': rotationDegree == -90,
+                        'canvas-rotate-2': rotationDegree == -180,
+                        'canvas-rotate-3': rotationDegree == -270,
+                        'canvas-rotate-4': rotationDegree == 0}">
+            </canvas>
+          </ng-template>
+
       </div>
       <div class="timeline">
-        <ngx-slider id="slider2" *ngIf="!videoLoopActive; else dualSlider" [(value)]="diagnosticCurrentTime" [options]="optionsSingle"
+        <ngx-slider id="slider2" *ngIf="!videoLoopActive; else dualSlider" [(value)]="diagnosticCurrentTime"
+                    [options]="optionsSingle"
                     class="custom-slider" (userChange)="updateLastFrameForTimeline()"></ngx-slider>
         <ng-template #dualSlider>
           <ngx-slider id="slider1" *ngIf="videoLoopActive" [(value)]="minValue" [(highValue)]="maxValue"

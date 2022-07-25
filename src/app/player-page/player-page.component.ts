@@ -1,11 +1,13 @@
-import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
+import {Component, ElementRef, Input, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute} from "@angular/router";
 import {VideoDto} from "../video/model";
 import {NgToastService} from "ng-angular-popup";
 import {ButtonMessagesEnum} from "./button-messages-enum";
 import {PlayerRestController} from "../rest/player-rest-controller";
 import {Options} from '@angular-slider/ngx-slider';
+import {PreviewLoadingService} from "../services/preview-loading/preview-loading.service";
 
+//TODO přidat service abych mohl stahovat videa ze serveru i v player pagy
 
 @Component({
   selector: 'app-player-page',
@@ -35,6 +37,10 @@ export class PlayerPageComponent implements OnInit {
   private ctx: CanvasRenderingContext2D | undefined;
   downloadedFlag: boolean = false;
   videoLoopActive: boolean = false;
+  canvasWidth: number = 0;
+  canvasHeight: number = 0;
+
+  cameraPreviewsDtoArray: any;
 
   optionsSingle: Options = {
     floor: 0,
@@ -63,7 +69,9 @@ export class PlayerPageComponent implements OnInit {
 
   constructor(private activatedRoute: ActivatedRoute,
               private toastMsg: NgToastService,
-              private playerRestController: PlayerRestController) {
+              private playerRestController: PlayerRestController,
+              private videoPreviewService: PreviewLoadingService) {
+    this.videoPreviewService.getDtoArray.subscribe(result => this.cameraPreviewsDtoArray = result);
   }
 
   ngOnInit(): void {
@@ -114,10 +122,13 @@ export class PlayerPageComponent implements OnInit {
       scaledWidth = Math.sqrt(pixel / wRatio);
       scaledHeight = Math.sqrt(pixel / hRatio);
     }
+    this.canvasWidth = scaledWidth;
+    this.canvasHeight = scaledHeight;
     return [scaledWidth, scaledHeight]
   }
 
   videoLoopActivated(){
+    console.log(this.cameraPreviewsDtoArray)
     this.startStopButtonClicked(true, false)
     let button = document.getElementById('loopButton');
     this.videoLoopActive = !this.videoLoopActive;
@@ -134,7 +145,7 @@ export class PlayerPageComponent implements OnInit {
   updateLastFrameForTimeline() {
     if (!this.videoLoopActive){
       this.startStopButtonClicked(true, false);
-      this.actualIndex = Math.floor((this.diagnosticCurrentTime * this.videoDto.images_count) / this.recSize!)
+      this.actualIndex = Math.floor((this.diagnosticCurrentTime * this.videoDto.images_count) / this.recSize!);
       this.startStopButtonClicked(true, true);
     }
   }
@@ -147,8 +158,7 @@ export class PlayerPageComponent implements OnInit {
 
   onRotateFrameClicked() {
     this.rotationDegree -= 90;
-    let canvas = document.getElementById('diagnosticCanvas');
-    canvas!.style.transform = 'rotate(' + this.rotationDegree + 'deg)';
+    if (this.rotationDegree == -360) this.rotationDegree = 0;
   }
 
   toggleDiagnosticMode(diagnosticOn: boolean, videoPreviewRef: any) {
