@@ -28,7 +28,7 @@ export class PlayerRestController {
     return this.http.post<any>('http://127.0.0.1:5000/metadata/date', {start, end})
   }
 
-  onGetFrameByIndex(video_id: string, index: number) {
+  onGetFrameByIndex(video_id: number, index: number) {
     return this.http.post<any>('http://127.0.0.1:5000/player/get-frame-by-index', {video_id, index})
   }
 

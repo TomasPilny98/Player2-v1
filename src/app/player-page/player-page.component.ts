@@ -88,13 +88,8 @@ export class PlayerPageComponent implements OnInit {
         params['signal_request'],
         '')
     })
-    this.recSize = this.videoDto.images_count / this.videoDto.frame_rate;
-    this.optionsSingle.ceil = this.recSize;
-    this.optionsDual.ceil = this.recSize;
-    this.maxValue = (this.recSize / 2) + 10;
-    this.minValue = (this.recSize / 2) - 10;
-    this.setFrameShift()
-    this.loadedFrames = new Array(this.videoDto.images_count)
+    this.loadedFrames = new Array(this.videoDto.images_count);
+    this.setupTimeLine();
 
     this.image.onload = function () {
       image_load()
@@ -108,8 +103,31 @@ export class PlayerPageComponent implements OnInit {
       this.ctx!.drawImage(this.image, 0, 0, scaledSizes[0], scaledSizes[1]);
     }
 
-    this.loadFirstFrame();
+    this.loadFirstFrame(this.videoDto.id);
     this.loadFramesByRange(1, this.videoDto.images_count).then();
+  }
+
+  changeVideo(metadata: VideoDto) {
+    this.videoDto = metadata;
+    this.startStopButtonClicked(true, false);
+    this.loadedFrames.splice(0);
+    this.actualIndex = 1;
+    this.diagnosticCurrentTime = 0;
+    this.setupTimeLine();
+    this.loadFirstFrame(metadata.id);
+    this.loadFramesByRange(1, metadata.images_count).then();
+    this.videoLoopActive = true;
+    setTimeout(() => this.videoLoopActive=false, 10);
+
+  }
+
+  setupTimeLine() {
+    this.recSize = this.videoDto.images_count / this.videoDto.frame_rate;
+    this.optionsSingle.ceil = this.recSize;
+    this.optionsDual.ceil = this.recSize;
+    this.maxValue = (this.recSize / 2) + 10;
+    this.minValue = (this.recSize / 2) - 10;
+    this.setFrameShift(this.videoDto.frame_rate);
   }
 
   calculateDownscale(width: number, height: number, scalePercentage: number): number[] {
@@ -127,11 +145,14 @@ export class PlayerPageComponent implements OnInit {
     return [scaledWidth, scaledHeight]
   }
 
-  videoLoopActivated(){
-    console.log(this.cameraPreviewsDtoArray)
+  videoLoopActivated(directControl: boolean){
+    console.log('volam se s hodnotou', directControl)
+    if (directControl) this.videoLoopActive = directControl;
+    else this.videoLoopActive = !this.videoLoopActive;
+
     this.startStopButtonClicked(true, false)
     let button = document.getElementById('loopButton');
-    this.videoLoopActive = !this.videoLoopActive;
+
     if (this.videoLoopActive)
       button!.style.backgroundColor = 'lightgreen';
     else
@@ -170,8 +191,8 @@ export class PlayerPageComponent implements OnInit {
     this.diagnosticMode = !this.diagnosticMode;
   }
 
-  setFrameShift() {
-    this.frameShift = Math.floor(this.videoDto.frame_rate / this.diagnosticFps)
+  setFrameShift(frameRate: number) {
+    this.frameShift = Math.floor(frameRate / this.diagnosticFps)
   }
 
   setCurrentTime(data: any) {
@@ -205,15 +226,17 @@ export class PlayerPageComponent implements OnInit {
     })
   }
 
-  loadFirstFrame() {
-    this.playerRestController.onGetFrameByIndex(this.videoDto.id, 0).subscribe(frame => {
+  loadFirstFrame(videoId: number) {
+    this.playerRestController.onGetFrameByIndex(videoId, 0).subscribe(frame => {
       this.loadedFrames.push(frame)
-
     })
   }
 
+
+  //TODO tahle podminka vzdycky projde protože na zacatku setuju loadedFrames.length = images count
   canLoadAnotherFrame(): boolean {
-    return this.loadedFrames.length - 1 < this.videoDto.images_count
+    console.log(this.loadedFrames.length , this.videoDto.images_count)
+    return this.loadedFrames.length < this.videoDto.images_count
   }
 
   startStopButtonClicked(timeLineControl: boolean, videoPlaying: any = null) {

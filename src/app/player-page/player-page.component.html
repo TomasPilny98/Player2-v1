@@ -15,7 +15,7 @@
       <div class="video-previews">
         <div *ngIf="cameraPreviewsDtoArray && cameraPreviewsDtoArray.length > 0">
           <div *ngFor="let metadata of cameraPreviewsDtoArray">
-            <app-video [videoDto]="metadata"></app-video>
+            <app-video (click)="changeVideo(metadata)" [videoDto]="metadata"></app-video>
           </div>
         </div>
       </div>
@@ -93,7 +93,7 @@
               <mat-icon>rotate_90_degrees_ccw</mat-icon>
             </button>
             <button id="loopButton" class="player-button" mat-raised-button
-                    (click)="videoLoopActivated()">
+                    (click)="videoLoopActivated(false)">
               <mat-icon *ngIf="!videoLoopActive; else changedLoopLabel" matTooltip="{{enumRef.MSG6}}">loop</mat-icon>
               <ng-template #changedLoopLabel>
                 <mat-icon matTooltip="{{enumRef.MSG7}}">loop</mat-icon>

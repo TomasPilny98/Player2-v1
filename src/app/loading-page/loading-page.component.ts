@@ -42,7 +42,7 @@ export class LoadingPageComponent implements OnInit {
       this.videoDtoArray.splice(0)
       this.startDate = null;
       this.endDate = null;
-      this.selectedCamerasForm.reset()
+      this.selectedCamerasForm.reset();
     }
   }
 
