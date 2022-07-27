@@ -9,16 +9,16 @@ import {MatInputModule} from "@angular/material/input";
 import {MatDatepickerModule} from "@angular/material/datepicker";
 import {MatNativeDateModule} from "@angular/material/core";
 import {MatSelectModule} from "@angular/material/select";
-import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {MatButtonModule} from "@angular/material/button";
 import {MatIconModule} from "@angular/material/icon";
-import {HttpClientModule} from '@angular/common/http';
 import {MatTooltipModule} from "@angular/material/tooltip";
-import {NgToastModule} from "ng-angular-popup";
-import {NgxSliderModule} from "@angular-slider/ngx-slider";
 import {MatProgressSpinnerModule} from "@angular/material/progress-spinner";
 import {MatToolbarModule} from "@angular/material/toolbar";
 import {MatSlideToggleModule} from "@angular/material/slide-toggle";
+import {FormsModule, ReactiveFormsModule} from "@angular/forms";
+import {NgToastModule} from "ng-angular-popup";
+import {NgxSliderModule} from "@angular-slider/ngx-slider";
+import {HttpClientModule} from '@angular/common/http';
 
 
 @NgModule({
